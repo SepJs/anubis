@@ -1,0 +1,770 @@
+{
+  "baseline": {
+    "target": "https://web.rubika.ir/",
+    "captured_at": "2026-06-13T22:58:56.999976587+03:30",
+    "avg_response_time_ms": 176.6,
+    "min_response_time_ms": 173,
+    "max_response_time_ms": 184,
+    "status_code": 200,
+    "server_header": "Microsoft-IIS/10.0",
+    "content_type": "text/html",
+    "connection_stable": true,
+    "tls_enabled": true,
+    "response_headers": {
+      "Accept-Ranges": "bytes",
+      "Content-Type": "text/html",
+      "Date": "Sat, 13 Jun 2026 19:28:26 GMT",
+      "Etag": "\"0b0ab362fbdc1:0\"",
+      "Last-Modified": "Sat, 13 Jun 2026 06:59:44 GMT",
+      "Server": "Microsoft-IIS/10.0",
+      "Vary": "Accept-Encoding",
+      "X-Powered-By": "ASP.NET"
+    },
+    "probes": 5
+  },
+  "by_endpoint": {
+    "https://web.rubika.ir/": [
+      {
+        "id": "header-missing-contentsecuritypolicy",
+        "module": "HEADERS",
+        "type": "misconfiguration",
+        "title": "Missing Security Header: Content-Security-Policy",
+        "description": "Content-Security-Policy (CSP) header is missing. This allows attackers to inject and execute malicious scripts (XSS).",
+        "severity": "HIGH",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "remediation": "Add a strict CSP header. Start with a restrictive policy and relax as needed.",
+        "vuln_code": "# Missing CSP header — no protection against XSS",
+        "secure_code": "Content-Security-Policy: default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'",
+        "owasp_mapping": "A03:2021 – Injection",
+        "discovered_at": "2026-06-13T22:58:59.110292174+03:30"
+      },
+      {
+        "id": "header-missing-xcontenttypeoptions",
+        "module": "HEADERS",
+        "type": "misconfiguration",
+        "title": "Missing Security Header: X-Content-Type-Options",
+        "description": "X-Content-Type-Options header is missing. Browsers may MIME-sniff responses, potentially executing non-script resources as scripts.",
+        "severity": "MEDIUM",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "remediation": "Add: X-Content-Type-Options: nosniff",
+        "vuln_code": "# Missing — browser may MIME-sniff",
+        "secure_code": "X-Content-Type-Options: nosniff",
+        "owasp_mapping": "A05:2021 – Security Misconfiguration",
+        "discovered_at": "2026-06-13T22:58:59.110293697+03:30"
+      },
+      {
+        "id": "header-missing-stricttransportsecurity",
+        "module": "HEADERS",
+        "type": "misconfiguration",
+        "title": "Missing Security Header: Strict-Transport-Security",
+        "description": "HTTP Strict Transport Security (HSTS) header is missing. Users can be downgraded to HTTP connections.",
+        "severity": "MEDIUM",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "remediation": "Add HSTS with a long max-age. Consider including subdomains and preload.",
+        "vuln_code": "# Missing HSTS — HTTP downgrade possible",
+        "secure_code": "Strict-Transport-Security: max-age=31536000; includeSubDomains; preload",
+        "owasp_mapping": "A02:2021 – Cryptographic Failures",
+        "discovered_at": "2026-06-13T22:58:59.110299079+03:30"
+      },
+      {
+        "id": "header-missing-referrerpolicy",
+        "module": "HEADERS",
+        "type": "misconfiguration",
+        "title": "Missing Security Header: Referrer-Policy",
+        "description": "Referrer-Policy header is missing. The browser may leak the full URL in the Referer header to third parties.",
+        "severity": "LOW",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "remediation": "Add: Referrer-Policy: strict-origin-when-cross-origin",
+        "secure_code": "Referrer-Policy: strict-origin-when-cross-origin",
+        "owasp_mapping": "A05:2021 – Security Misconfiguration",
+        "discovered_at": "2026-06-13T22:58:59.110300066+03:30"
+      },
+      {
+        "id": "header-missing-xframeoptions",
+        "module": "HEADERS",
+        "type": "misconfiguration",
+        "title": "Missing Security Header: X-Frame-Options",
+        "description": "X-Frame-Options header is missing. The page can be embedded in an iframe, enabling clickjacking attacks.",
+        "severity": "MEDIUM",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "remediation": "Add: X-Frame-Options: DENY (or SAMEORIGIN if iframe embedding is needed on same domain)",
+        "vuln_code": "# Missing — clickjacking possible",
+        "secure_code": "X-Frame-Options: DENY",
+        "owasp_mapping": "A05:2021 – Security Misconfiguration",
+        "discovered_at": "2026-06-13T22:58:59.110300713+03:30"
+      },
+      {
+        "id": "header-missing-permissionspolicy",
+        "module": "HEADERS",
+        "type": "misconfiguration",
+        "title": "Missing Security Header: Permissions-Policy",
+        "description": "Permissions-Policy header is missing. Browser features (camera, microphone, geolocation) are not explicitly restricted.",
+        "severity": "LOW",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "remediation": "Add a Permissions-Policy header restricting unused browser features.",
+        "secure_code": "Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()",
+        "owasp_mapping": "A05:2021 – Security Misconfiguration",
+        "discovered_at": "2026-06-13T22:58:59.110301403+03:30"
+      },
+      {
+        "id": "header-missing-xxssprotection",
+        "module": "HEADERS",
+        "type": "misconfiguration",
+        "title": "Missing Security Header: X-XSS-Protection",
+        "description": "X-XSS-Protection header is missing. Modern browsers have deprecated this, but older browsers benefit from it.",
+        "severity": "LOW",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "remediation": "Add: X-XSS-Protection: 1; mode=block (or 0 to disable broken IE implementation)",
+        "secure_code": "X-XSS-Protection: 1; mode=block",
+        "owasp_mapping": "A03:2021 – Injection",
+        "discovered_at": "2026-06-13T22:58:59.11030233+03:30"
+      },
+      {
+        "id": "header-exposed-server",
+        "module": "HEADERS",
+        "type": "informational",
+        "title": "Information Disclosure: Server: Microsoft-IIS/10.0",
+        "description": "Server header reveals the web server version, aiding attackers in targeting known vulnerabilities.",
+        "severity": "LOW",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "evidence": "Server: Microsoft-IIS/10.0",
+        "remediation": "Remove or obfuscate the Server header in your web server configuration.",
+        "discovered_at": "2026-06-13T22:58:59.110303395+03:30"
+      },
+      {
+        "id": "header-exposed-xpoweredby",
+        "module": "HEADERS",
+        "type": "informational",
+        "title": "Information Disclosure: X-Powered-By: ASP.NET",
+        "description": "X-Powered-By header reveals the backend technology stack (e.g., PHP/5.6), aiding attackers.",
+        "severity": "LOW",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "evidence": "X-Powered-By: ASP.NET",
+        "remediation": "Remove the X-Powered-By header (e.g., header_remove('X-Powered-By') in PHP).",
+        "discovered_at": "2026-06-13T22:58:59.110304427+03:30"
+      }
+    ],
+    "web.rubika.ir": [
+      {
+        "id": "port-80",
+        "module": "PORT_SCAN",
+        "type": "informational",
+        "title": "Open port: 80/tcp (HTTP)",
+        "description": "Port 80/tcp is open (HTTP)",
+        "severity": "INFO",
+        "confidence": "confirmed",
+        "endpoint": "web.rubika.ir",
+        "references": [
+          "https://www.iana.org/assignments/service-names-port-numbers"
+        ],
+        "discovered_at": "2026-06-13T22:59:14.047091576+03:30"
+      },
+      {
+        "id": "port-443",
+        "module": "PORT_SCAN",
+        "type": "informational",
+        "title": "Open port: 443/tcp (HTTPS)",
+        "description": "Port 443/tcp is open (HTTPS)",
+        "severity": "INFO",
+        "confidence": "confirmed",
+        "endpoint": "web.rubika.ir",
+        "references": [
+          "https://www.iana.org/assignments/service-names-port-numbers"
+        ],
+        "discovered_at": "2026-06-13T22:59:14.047093541+03:30"
+      }
+    ]
+  },
+  "by_severity": {
+    "HIGH": [
+      {
+        "id": "header-missing-contentsecuritypolicy",
+        "module": "HEADERS",
+        "type": "misconfiguration",
+        "title": "Missing Security Header: Content-Security-Policy",
+        "description": "Content-Security-Policy (CSP) header is missing. This allows attackers to inject and execute malicious scripts (XSS).",
+        "severity": "HIGH",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "remediation": "Add a strict CSP header. Start with a restrictive policy and relax as needed.",
+        "vuln_code": "# Missing CSP header — no protection against XSS",
+        "secure_code": "Content-Security-Policy: default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'",
+        "owasp_mapping": "A03:2021 – Injection",
+        "discovered_at": "2026-06-13T22:58:59.110292174+03:30"
+      }
+    ],
+    "INFO": [
+      {
+        "id": "SSL-1781378938950981935",
+        "module": "SSL_CHECK",
+        "type": "informational",
+        "title": "SSL/TLS Certificate Information",
+        "description": "Extracted public certificate details from target SSL/TLS configuration.",
+        "severity": "INFO",
+        "confidence": "confirmed",
+        "evidence": "[+] Subject: rubika.ir\n[+] Issuer: R13\n[+] Algorithm: SHA256-RSA\n[+] Key Length: 2048 bits\n[+] Expires: 2026-07-17 (Valid for 34 days)\n",
+        "discovered_at": "2026-06-13T22:58:58.950982393+03:30"
+      },
+      {
+        "id": "port-80",
+        "module": "PORT_SCAN",
+        "type": "informational",
+        "title": "Open port: 80/tcp (HTTP)",
+        "description": "Port 80/tcp is open (HTTP)",
+        "severity": "INFO",
+        "confidence": "confirmed",
+        "endpoint": "web.rubika.ir",
+        "references": [
+          "https://www.iana.org/assignments/service-names-port-numbers"
+        ],
+        "discovered_at": "2026-06-13T22:59:14.047091576+03:30"
+      },
+      {
+        "id": "port-443",
+        "module": "PORT_SCAN",
+        "type": "informational",
+        "title": "Open port: 443/tcp (HTTPS)",
+        "description": "Port 443/tcp is open (HTTPS)",
+        "severity": "INFO",
+        "confidence": "confirmed",
+        "endpoint": "web.rubika.ir",
+        "references": [
+          "https://www.iana.org/assignments/service-names-port-numbers"
+        ],
+        "discovered_at": "2026-06-13T22:59:14.047093541+03:30"
+      }
+    ],
+    "LOW": [
+      {
+        "id": "header-missing-referrerpolicy",
+        "module": "HEADERS",
+        "type": "misconfiguration",
+        "title": "Missing Security Header: Referrer-Policy",
+        "description": "Referrer-Policy header is missing. The browser may leak the full URL in the Referer header to third parties.",
+        "severity": "LOW",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "remediation": "Add: Referrer-Policy: strict-origin-when-cross-origin",
+        "secure_code": "Referrer-Policy: strict-origin-when-cross-origin",
+        "owasp_mapping": "A05:2021 – Security Misconfiguration",
+        "discovered_at": "2026-06-13T22:58:59.110300066+03:30"
+      },
+      {
+        "id": "header-missing-permissionspolicy",
+        "module": "HEADERS",
+        "type": "misconfiguration",
+        "title": "Missing Security Header: Permissions-Policy",
+        "description": "Permissions-Policy header is missing. Browser features (camera, microphone, geolocation) are not explicitly restricted.",
+        "severity": "LOW",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "remediation": "Add a Permissions-Policy header restricting unused browser features.",
+        "secure_code": "Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()",
+        "owasp_mapping": "A05:2021 – Security Misconfiguration",
+        "discovered_at": "2026-06-13T22:58:59.110301403+03:30"
+      },
+      {
+        "id": "header-missing-xxssprotection",
+        "module": "HEADERS",
+        "type": "misconfiguration",
+        "title": "Missing Security Header: X-XSS-Protection",
+        "description": "X-XSS-Protection header is missing. Modern browsers have deprecated this, but older browsers benefit from it.",
+        "severity": "LOW",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "remediation": "Add: X-XSS-Protection: 1; mode=block (or 0 to disable broken IE implementation)",
+        "secure_code": "X-XSS-Protection: 1; mode=block",
+        "owasp_mapping": "A03:2021 – Injection",
+        "discovered_at": "2026-06-13T22:58:59.11030233+03:30"
+      },
+      {
+        "id": "header-exposed-server",
+        "module": "HEADERS",
+        "type": "informational",
+        "title": "Information Disclosure: Server: Microsoft-IIS/10.0",
+        "description": "Server header reveals the web server version, aiding attackers in targeting known vulnerabilities.",
+        "severity": "LOW",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "evidence": "Server: Microsoft-IIS/10.0",
+        "remediation": "Remove or obfuscate the Server header in your web server configuration.",
+        "discovered_at": "2026-06-13T22:58:59.110303395+03:30"
+      },
+      {
+        "id": "header-exposed-xpoweredby",
+        "module": "HEADERS",
+        "type": "informational",
+        "title": "Information Disclosure: X-Powered-By: ASP.NET",
+        "description": "X-Powered-By header reveals the backend technology stack (e.g., PHP/5.6), aiding attackers.",
+        "severity": "LOW",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "evidence": "X-Powered-By: ASP.NET",
+        "remediation": "Remove the X-Powered-By header (e.g., header_remove('X-Powered-By') in PHP).",
+        "discovered_at": "2026-06-13T22:58:59.110304427+03:30"
+      }
+    ],
+    "MEDIUM": [
+      {
+        "id": "header-missing-xcontenttypeoptions",
+        "module": "HEADERS",
+        "type": "misconfiguration",
+        "title": "Missing Security Header: X-Content-Type-Options",
+        "description": "X-Content-Type-Options header is missing. Browsers may MIME-sniff responses, potentially executing non-script resources as scripts.",
+        "severity": "MEDIUM",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "remediation": "Add: X-Content-Type-Options: nosniff",
+        "vuln_code": "# Missing — browser may MIME-sniff",
+        "secure_code": "X-Content-Type-Options: nosniff",
+        "owasp_mapping": "A05:2021 – Security Misconfiguration",
+        "discovered_at": "2026-06-13T22:58:59.110293697+03:30"
+      },
+      {
+        "id": "header-missing-stricttransportsecurity",
+        "module": "HEADERS",
+        "type": "misconfiguration",
+        "title": "Missing Security Header: Strict-Transport-Security",
+        "description": "HTTP Strict Transport Security (HSTS) header is missing. Users can be downgraded to HTTP connections.",
+        "severity": "MEDIUM",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "remediation": "Add HSTS with a long max-age. Consider including subdomains and preload.",
+        "vuln_code": "# Missing HSTS — HTTP downgrade possible",
+        "secure_code": "Strict-Transport-Security: max-age=31536000; includeSubDomains; preload",
+        "owasp_mapping": "A02:2021 – Cryptographic Failures",
+        "discovered_at": "2026-06-13T22:58:59.110299079+03:30"
+      },
+      {
+        "id": "header-missing-xframeoptions",
+        "module": "HEADERS",
+        "type": "misconfiguration",
+        "title": "Missing Security Header: X-Frame-Options",
+        "description": "X-Frame-Options header is missing. The page can be embedded in an iframe, enabling clickjacking attacks.",
+        "severity": "MEDIUM",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "remediation": "Add: X-Frame-Options: DENY (or SAMEORIGIN if iframe embedding is needed on same domain)",
+        "vuln_code": "# Missing — clickjacking possible",
+        "secure_code": "X-Frame-Options: DENY",
+        "owasp_mapping": "A05:2021 – Security Misconfiguration",
+        "discovered_at": "2026-06-13T22:58:59.110300713+03:30"
+      }
+    ]
+  },
+  "by_type": {
+    "informational": [
+      {
+        "id": "SSL-1781378938950981935",
+        "module": "SSL_CHECK",
+        "type": "informational",
+        "title": "SSL/TLS Certificate Information",
+        "description": "Extracted public certificate details from target SSL/TLS configuration.",
+        "severity": "INFO",
+        "confidence": "confirmed",
+        "evidence": "[+] Subject: rubika.ir\n[+] Issuer: R13\n[+] Algorithm: SHA256-RSA\n[+] Key Length: 2048 bits\n[+] Expires: 2026-07-17 (Valid for 34 days)\n",
+        "discovered_at": "2026-06-13T22:58:58.950982393+03:30"
+      },
+      {
+        "id": "header-exposed-server",
+        "module": "HEADERS",
+        "type": "informational",
+        "title": "Information Disclosure: Server: Microsoft-IIS/10.0",
+        "description": "Server header reveals the web server version, aiding attackers in targeting known vulnerabilities.",
+        "severity": "LOW",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "evidence": "Server: Microsoft-IIS/10.0",
+        "remediation": "Remove or obfuscate the Server header in your web server configuration.",
+        "discovered_at": "2026-06-13T22:58:59.110303395+03:30"
+      },
+      {
+        "id": "header-exposed-xpoweredby",
+        "module": "HEADERS",
+        "type": "informational",
+        "title": "Information Disclosure: X-Powered-By: ASP.NET",
+        "description": "X-Powered-By header reveals the backend technology stack (e.g., PHP/5.6), aiding attackers.",
+        "severity": "LOW",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "evidence": "X-Powered-By: ASP.NET",
+        "remediation": "Remove the X-Powered-By header (e.g., header_remove('X-Powered-By') in PHP).",
+        "discovered_at": "2026-06-13T22:58:59.110304427+03:30"
+      },
+      {
+        "id": "port-80",
+        "module": "PORT_SCAN",
+        "type": "informational",
+        "title": "Open port: 80/tcp (HTTP)",
+        "description": "Port 80/tcp is open (HTTP)",
+        "severity": "INFO",
+        "confidence": "confirmed",
+        "endpoint": "web.rubika.ir",
+        "references": [
+          "https://www.iana.org/assignments/service-names-port-numbers"
+        ],
+        "discovered_at": "2026-06-13T22:59:14.047091576+03:30"
+      },
+      {
+        "id": "port-443",
+        "module": "PORT_SCAN",
+        "type": "informational",
+        "title": "Open port: 443/tcp (HTTPS)",
+        "description": "Port 443/tcp is open (HTTPS)",
+        "severity": "INFO",
+        "confidence": "confirmed",
+        "endpoint": "web.rubika.ir",
+        "references": [
+          "https://www.iana.org/assignments/service-names-port-numbers"
+        ],
+        "discovered_at": "2026-06-13T22:59:14.047093541+03:30"
+      }
+    ],
+    "misconfiguration": [
+      {
+        "id": "header-missing-contentsecuritypolicy",
+        "module": "HEADERS",
+        "type": "misconfiguration",
+        "title": "Missing Security Header: Content-Security-Policy",
+        "description": "Content-Security-Policy (CSP) header is missing. This allows attackers to inject and execute malicious scripts (XSS).",
+        "severity": "HIGH",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "remediation": "Add a strict CSP header. Start with a restrictive policy and relax as needed.",
+        "vuln_code": "# Missing CSP header — no protection against XSS",
+        "secure_code": "Content-Security-Policy: default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'",
+        "owasp_mapping": "A03:2021 – Injection",
+        "discovered_at": "2026-06-13T22:58:59.110292174+03:30"
+      },
+      {
+        "id": "header-missing-xcontenttypeoptions",
+        "module": "HEADERS",
+        "type": "misconfiguration",
+        "title": "Missing Security Header: X-Content-Type-Options",
+        "description": "X-Content-Type-Options header is missing. Browsers may MIME-sniff responses, potentially executing non-script resources as scripts.",
+        "severity": "MEDIUM",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "remediation": "Add: X-Content-Type-Options: nosniff",
+        "vuln_code": "# Missing — browser may MIME-sniff",
+        "secure_code": "X-Content-Type-Options: nosniff",
+        "owasp_mapping": "A05:2021 – Security Misconfiguration",
+        "discovered_at": "2026-06-13T22:58:59.110293697+03:30"
+      },
+      {
+        "id": "header-missing-stricttransportsecurity",
+        "module": "HEADERS",
+        "type": "misconfiguration",
+        "title": "Missing Security Header: Strict-Transport-Security",
+        "description": "HTTP Strict Transport Security (HSTS) header is missing. Users can be downgraded to HTTP connections.",
+        "severity": "MEDIUM",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "remediation": "Add HSTS with a long max-age. Consider including subdomains and preload.",
+        "vuln_code": "# Missing HSTS — HTTP downgrade possible",
+        "secure_code": "Strict-Transport-Security: max-age=31536000; includeSubDomains; preload",
+        "owasp_mapping": "A02:2021 – Cryptographic Failures",
+        "discovered_at": "2026-06-13T22:58:59.110299079+03:30"
+      },
+      {
+        "id": "header-missing-referrerpolicy",
+        "module": "HEADERS",
+        "type": "misconfiguration",
+        "title": "Missing Security Header: Referrer-Policy",
+        "description": "Referrer-Policy header is missing. The browser may leak the full URL in the Referer header to third parties.",
+        "severity": "LOW",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "remediation": "Add: Referrer-Policy: strict-origin-when-cross-origin",
+        "secure_code": "Referrer-Policy: strict-origin-when-cross-origin",
+        "owasp_mapping": "A05:2021 – Security Misconfiguration",
+        "discovered_at": "2026-06-13T22:58:59.110300066+03:30"
+      },
+      {
+        "id": "header-missing-xframeoptions",
+        "module": "HEADERS",
+        "type": "misconfiguration",
+        "title": "Missing Security Header: X-Frame-Options",
+        "description": "X-Frame-Options header is missing. The page can be embedded in an iframe, enabling clickjacking attacks.",
+        "severity": "MEDIUM",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "remediation": "Add: X-Frame-Options: DENY (or SAMEORIGIN if iframe embedding is needed on same domain)",
+        "vuln_code": "# Missing — clickjacking possible",
+        "secure_code": "X-Frame-Options: DENY",
+        "owasp_mapping": "A05:2021 – Security Misconfiguration",
+        "discovered_at": "2026-06-13T22:58:59.110300713+03:30"
+      },
+      {
+        "id": "header-missing-permissionspolicy",
+        "module": "HEADERS",
+        "type": "misconfiguration",
+        "title": "Missing Security Header: Permissions-Policy",
+        "description": "Permissions-Policy header is missing. Browser features (camera, microphone, geolocation) are not explicitly restricted.",
+        "severity": "LOW",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "remediation": "Add a Permissions-Policy header restricting unused browser features.",
+        "secure_code": "Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()",
+        "owasp_mapping": "A05:2021 – Security Misconfiguration",
+        "discovered_at": "2026-06-13T22:58:59.110301403+03:30"
+      },
+      {
+        "id": "header-missing-xxssprotection",
+        "module": "HEADERS",
+        "type": "misconfiguration",
+        "title": "Missing Security Header: X-XSS-Protection",
+        "description": "X-XSS-Protection header is missing. Modern browsers have deprecated this, but older browsers benefit from it.",
+        "severity": "LOW",
+        "confidence": "confirmed",
+        "endpoint": "https://web.rubika.ir/",
+        "remediation": "Add: X-XSS-Protection: 1; mode=block (or 0 to disable broken IE implementation)",
+        "secure_code": "X-XSS-Protection: 1; mode=block",
+        "owasp_mapping": "A03:2021 – Injection",
+        "discovered_at": "2026-06-13T22:58:59.11030233+03:30"
+      }
+    ]
+  },
+  "findings": [
+    {
+      "id": "SSL-1781378938950981935",
+      "module": "SSL_CHECK",
+      "type": "informational",
+      "title": "SSL/TLS Certificate Information",
+      "description": "Extracted public certificate details from target SSL/TLS configuration.",
+      "severity": "INFO",
+      "confidence": "confirmed",
+      "evidence": "[+] Subject: rubika.ir\n[+] Issuer: R13\n[+] Algorithm: SHA256-RSA\n[+] Key Length: 2048 bits\n[+] Expires: 2026-07-17 (Valid for 34 days)\n",
+      "discovered_at": "2026-06-13T22:58:58.950982393+03:30"
+    },
+    {
+      "id": "header-missing-contentsecuritypolicy",
+      "module": "HEADERS",
+      "type": "misconfiguration",
+      "title": "Missing Security Header: Content-Security-Policy",
+      "description": "Content-Security-Policy (CSP) header is missing. This allows attackers to inject and execute malicious scripts (XSS).",
+      "severity": "HIGH",
+      "confidence": "confirmed",
+      "endpoint": "https://web.rubika.ir/",
+      "remediation": "Add a strict CSP header. Start with a restrictive policy and relax as needed.",
+      "vuln_code": "# Missing CSP header — no protection against XSS",
+      "secure_code": "Content-Security-Policy: default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'",
+      "owasp_mapping": "A03:2021 – Injection",
+      "discovered_at": "2026-06-13T22:58:59.110292174+03:30"
+    },
+    {
+      "id": "header-missing-xcontenttypeoptions",
+      "module": "HEADERS",
+      "type": "misconfiguration",
+      "title": "Missing Security Header: X-Content-Type-Options",
+      "description": "X-Content-Type-Options header is missing. Browsers may MIME-sniff responses, potentially executing non-script resources as scripts.",
+      "severity": "MEDIUM",
+      "confidence": "confirmed",
+      "endpoint": "https://web.rubika.ir/",
+      "remediation": "Add: X-Content-Type-Options: nosniff",
+      "vuln_code": "# Missing — browser may MIME-sniff",
+      "secure_code": "X-Content-Type-Options: nosniff",
+      "owasp_mapping": "A05:2021 – Security Misconfiguration",
+      "discovered_at": "2026-06-13T22:58:59.110293697+03:30"
+    },
+    {
+      "id": "header-missing-stricttransportsecurity",
+      "module": "HEADERS",
+      "type": "misconfiguration",
+      "title": "Missing Security Header: Strict-Transport-Security",
+      "description": "HTTP Strict Transport Security (HSTS) header is missing. Users can be downgraded to HTTP connections.",
+      "severity": "MEDIUM",
+      "confidence": "confirmed",
+      "endpoint": "https://web.rubika.ir/",
+      "remediation": "Add HSTS with a long max-age. Consider including subdomains and preload.",
+      "vuln_code": "# Missing HSTS — HTTP downgrade possible",
+      "secure_code": "Strict-Transport-Security: max-age=31536000; includeSubDomains; preload",
+      "owasp_mapping": "A02:2021 – Cryptographic Failures",
+      "discovered_at": "2026-06-13T22:58:59.110299079+03:30"
+    },
+    {
+      "id": "header-missing-referrerpolicy",
+      "module": "HEADERS",
+      "type": "misconfiguration",
+      "title": "Missing Security Header: Referrer-Policy",
+      "description": "Referrer-Policy header is missing. The browser may leak the full URL in the Referer header to third parties.",
+      "severity": "LOW",
+      "confidence": "confirmed",
+      "endpoint": "https://web.rubika.ir/",
+      "remediation": "Add: Referrer-Policy: strict-origin-when-cross-origin",
+      "secure_code": "Referrer-Policy: strict-origin-when-cross-origin",
+      "owasp_mapping": "A05:2021 – Security Misconfiguration",
+      "discovered_at": "2026-06-13T22:58:59.110300066+03:30"
+    },
+    {
+      "id": "header-missing-xframeoptions",
+      "module": "HEADERS",
+      "type": "misconfiguration",
+      "title": "Missing Security Header: X-Frame-Options",
+      "description": "X-Frame-Options header is missing. The page can be embedded in an iframe, enabling clickjacking attacks.",
+      "severity": "MEDIUM",
+      "confidence": "confirmed",
+      "endpoint": "https://web.rubika.ir/",
+      "remediation": "Add: X-Frame-Options: DENY (or SAMEORIGIN if iframe embedding is needed on same domain)",
+      "vuln_code": "# Missing — clickjacking possible",
+      "secure_code": "X-Frame-Options: DENY",
+      "owasp_mapping": "A05:2021 – Security Misconfiguration",
+      "discovered_at": "2026-06-13T22:58:59.110300713+03:30"
+    },
+    {
+      "id": "header-missing-permissionspolicy",
+      "module": "HEADERS",
+      "type": "misconfiguration",
+      "title": "Missing Security Header: Permissions-Policy",
+      "description": "Permissions-Policy header is missing. Browser features (camera, microphone, geolocation) are not explicitly restricted.",
+      "severity": "LOW",
+      "confidence": "confirmed",
+      "endpoint": "https://web.rubika.ir/",
+      "remediation": "Add a Permissions-Policy header restricting unused browser features.",
+      "secure_code": "Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()",
+      "owasp_mapping": "A05:2021 – Security Misconfiguration",
+      "discovered_at": "2026-06-13T22:58:59.110301403+03:30"
+    },
+    {
+      "id": "header-missing-xxssprotection",
+      "module": "HEADERS",
+      "type": "misconfiguration",
+      "title": "Missing Security Header: X-XSS-Protection",
+      "description": "X-XSS-Protection header is missing. Modern browsers have deprecated this, but older browsers benefit from it.",
+      "severity": "LOW",
+      "confidence": "confirmed",
+      "endpoint": "https://web.rubika.ir/",
+      "remediation": "Add: X-XSS-Protection: 1; mode=block (or 0 to disable broken IE implementation)",
+      "secure_code": "X-XSS-Protection: 1; mode=block",
+      "owasp_mapping": "A03:2021 – Injection",
+      "discovered_at": "2026-06-13T22:58:59.11030233+03:30"
+    },
+    {
+      "id": "header-exposed-server",
+      "module": "HEADERS",
+      "type": "informational",
+      "title": "Information Disclosure: Server: Microsoft-IIS/10.0",
+      "description": "Server header reveals the web server version, aiding attackers in targeting known vulnerabilities.",
+      "severity": "LOW",
+      "confidence": "confirmed",
+      "endpoint": "https://web.rubika.ir/",
+      "evidence": "Server: Microsoft-IIS/10.0",
+      "remediation": "Remove or obfuscate the Server header in your web server configuration.",
+      "discovered_at": "2026-06-13T22:58:59.110303395+03:30"
+    },
+    {
+      "id": "header-exposed-xpoweredby",
+      "module": "HEADERS",
+      "type": "informational",
+      "title": "Information Disclosure: X-Powered-By: ASP.NET",
+      "description": "X-Powered-By header reveals the backend technology stack (e.g., PHP/5.6), aiding attackers.",
+      "severity": "LOW",
+      "confidence": "confirmed",
+      "endpoint": "https://web.rubika.ir/",
+      "evidence": "X-Powered-By: ASP.NET",
+      "remediation": "Remove the X-Powered-By header (e.g., header_remove('X-Powered-By') in PHP).",
+      "discovered_at": "2026-06-13T22:58:59.110304427+03:30"
+    },
+    {
+      "id": "port-80",
+      "module": "PORT_SCAN",
+      "type": "informational",
+      "title": "Open port: 80/tcp (HTTP)",
+      "description": "Port 80/tcp is open (HTTP)",
+      "severity": "INFO",
+      "confidence": "confirmed",
+      "endpoint": "web.rubika.ir",
+      "references": [
+        "https://www.iana.org/assignments/service-names-port-numbers"
+      ],
+      "discovered_at": "2026-06-13T22:59:14.047091576+03:30"
+    },
+    {
+      "id": "port-443",
+      "module": "PORT_SCAN",
+      "type": "informational",
+      "title": "Open port: 443/tcp (HTTPS)",
+      "description": "Port 443/tcp is open (HTTPS)",
+      "severity": "INFO",
+      "confidence": "confirmed",
+      "endpoint": "web.rubika.ir",
+      "references": [
+        "https://www.iana.org/assignments/service-names-port-numbers"
+      ],
+      "discovered_at": "2026-06-13T22:59:14.047093541+03:30"
+    }
+  ],
+  "meta": {
+    "end_time": "2026-06-13T22:59:14+03:30",
+    "generated_at": "2026-06-13T22:59:14+03:30",
+    "report_level": "comprehensive",
+    "scan_duration": "15.159275761s",
+    "scan_level": 1,
+    "start_time": "2026-06-13T22:58:58+03:30",
+    "target": "https://web.rubika.ir/",
+    "tool": "Anubis Security Scanner",
+    "version": "1.0.0"
+  },
+  "modules": [
+    {
+      "module_name": "SSL_CHECK",
+      "status": "completed",
+      "start_time": "2026-06-13T22:58:58.888442514+03:30",
+      "end_time": "2026-06-13T22:58:58.951025219+03:30",
+      "duration": 62582701,
+      "findings": null
+    },
+    {
+      "module_name": "HEADERS",
+      "status": "completed",
+      "start_time": "2026-06-13T22:58:58.888409746+03:30",
+      "end_time": "2026-06-13T22:58:59.110346875+03:30",
+      "duration": 221937127,
+      "findings": null
+    },
+    {
+      "module_name": "SENSITIVE_FILES",
+      "status": "completed",
+      "start_time": "2026-06-13T22:58:58.888465987+03:30",
+      "end_time": "2026-06-13T22:58:59.366450602+03:30",
+      "duration": 477984611,
+      "findings": null
+    },
+    {
+      "module_name": "PORT_SCAN",
+      "status": "completed",
+      "start_time": "2026-06-13T22:58:58.888269441+03:30",
+      "end_time": "2026-06-13T22:59:14.047093868+03:30",
+      "duration": 15158824424,
+      "findings": null
+    }
+  ],
+  "summary": {
+    "total_findings": 11,
+    "by_severity": {
+      "HIGH": 1,
+      "INFO": 2,
+      "LOW": 5,
+      "MEDIUM": 3
+    },
+    "by_type": {
+      "informational": 4,
+      "misconfiguration": 7
+    },
+    "by_confidence": {
+      "confirmed": 11
+    },
+    "modules_run": 4,
+    "modules_completed": 4,
+    "modules_failed": 0
+  }
+}
