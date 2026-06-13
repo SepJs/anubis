@@ -1,6 +1,6 @@
 # Anubis — Advanced Modular Web Security & Auditing Framework
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:ea1d25,100:ff6a6a&height=200&section=header&text=ANUBIS&fontSize=65&fontColor=ffffff&animation=fadeIn" width="100%"/>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:000000,40:8B0000,100:ea1d25&height=240&section=header&text=ANUBIS&fontSize=75&fontColor=ffffff&animation=fadeIn&fontAlignY=38" width="100%"/>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Go-1.21%2B-00ADD8?style=for-the-badge&logo=go" alt="Go Version">
