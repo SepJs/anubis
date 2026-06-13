@@ -1,18 +1,17 @@
 # Anubis — Advanced Modular Web Security & Auditing Framework
 
-```json
- ┌──────────────────────────────────────────────────────────────┐
- │  █████╗ ███╗   ██╗██╗   ██╗██████╗ ██╗███████╗               │
- │ ██╔══██╗████╗  ██║██║   ██║██╔══██╗██║██╔════╝               │
- │ ███████║██╔██╗ ██║██║   ██║██████╔╝██║███████╗               │
- │ ██╔══██║██║╚██╗██║██║   ██║██╔══██╗██║╚════██║               │
- │ ██║  ██║██║ ╚████║╚██████╔╝██████╔╝██║███████║               │
- │ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚═════╝ ╚═╝╚══════╝               │
- │                                                              │
- │  > Modular Security Auditing Engine                          │
- │  > Architecture Version 1.0.0 [STABLE]                       │
- └──────────────────────────────────────────────────────────────┘
-```
+```text
++------------------------------------------------------------+
+|  █████╗ ███╗   ██╗██╗   ██╗██████╗ ██╗███████╗             |
+| ██╔══██╗████╗  ██║██║   ██║██╔══██╗██║██╔════╝             |
+| ███████║██╔██╗ ██║██║   ██║██████╔╝██║███████╗             |
+| ██╔══██║██║╚██╗██║██║   ██║██╔══██╗██║╚════██║             |
+| ██║  ██║██║ ╚████║╚██████╔╝██████╔╝██║███████║             |
+| ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚═════╝ ╚═╝╚══════╝             |
+|                                                            |
+|  > Modular Security Auditing Engine                        |
+|  > Architecture Version 1.0.0 [STABLE]                     |
++------------------------------------------------------------+
 Anubis is a high-performance, concurrent web application security framework designed for tactical reconnaissance, vulnerability orchestration, and automated infrastructure auditing. Built natively in Go, Anubis leverages a stateful worker pool architecture to execute non-destructive corporate-grade security assessments with maximum throughput and microscopic latency.Lead Architect & Maintainer: Unknown Xrg⚡ Core Capabilities & Technical ArchitectureAnubis is engineered to bypass the limitations of legacy scanners by introducing a modern engineering pipeline:Stateful Worker Pool Logic: High-speed execution driven by a managed Goroutine pool, ensuring accurate rate limits and reliable thread isolation under heavy loads.Granular Lifecycle Pipeline: Features an automated Level 0 Pre-Scan Baseline engine that profiles remote asset responsiveness, latency deltas, and upstream WAF/firewall stability before injecting active payloads.Checkpoint & Hot-Restore Mechanism: Interrupt continuous scanning cycles at any stage (Ctrl+C) and resume execution using saved telemetry checkpoints (--resume).Multi-Format Enterprise Reporting: Synchronized multi-format reporting outputs (HTML, JSON, CSV) wrapped inside high-end analytical schemas with OWASP mapping.🛠️ Built With & Technology StackThe framework utilizes a highly optimized, modern tech stack for cybersecurity tooling:Core Engine: Go (Golang 1.21+) — Chosen for its native concurrency management (Goroutines), low memory footprint, and compilation into a single self-contained binary.CLI Architecture: Cobra Framework — Powering the robust command-line routing, auto-generated help interfaces, and nested flagship enterprise flags.Console Aesthetics: Fatih Color — Injecting optimized ANSI color schemas and high-contrast logging states into stdout/stderr pipelines.📊 Framework Inspection ProfilesThe testing architecture is segmented into progressive intensity vectors, balancing stealth and comprehensive analysis:Profiling TierIntent & DescriptionExecuted Vectors / ModulesLevel 0 (Baseline)Pre-Scan EvaluationTarget delta variance, latency telemetry, response stability mapping.Level 1 (Passive/Light)Non-Intrusive ReconTCP Connect service mapping (PORT_SCAN), SSL/TLS Cipher Analysis (SSL_CHECK), Missing Security Headers (HEADERS), Passive Sensitive Discovery (SENSITIVE_FILES).Level 2 (Active Scan)Directed AuditingDNS sub-domain brute-forcing (DNS), Error-based SQLi analysis (SQLI), Reflected XSS parsing (XSS), Default Credentials checking (BRUTE_FORCE).Level 3 (Comprehensive)Aggressive FingerprintingDeep Tech-Stack profiling (FINGERPRINT), Extended sensitive directory sweeps, Multi-parameter mapping.💾 Installation & Local DeploymentPrerequisitesGo Engine: Version 1.21 or higher installed on your system.Option 1: Automated Secure Installer (Recommended)This approach automatically checks your local environment, installs missing dependencies, compiles the production binary, and moves it to your global path:Bash# Clone the repository
 git clone [https://github.com/YOUR_GITHUB_USERNAME/anubis.git](https://github.com/YOUR_GITHUB_USERNAME/anubis.git)
 cd anubis
