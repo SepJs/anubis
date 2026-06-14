@@ -69,7 +69,7 @@ Anubis replaces legacy scanning limitations with a modern, concurrent execution 
 ### 🔹 Automated Installation (Recommended)
 
 ```bash
-git clone https://github.com/YOUR_GITHUB_USERNAME/anubis.git
+git clone https://github.com/SepJS/anubis.git
 cd anubis
 
 chmod +x install.sh
