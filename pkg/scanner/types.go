@@ -2,6 +2,7 @@ package scanner
 
 import (
 	"time"
+	"github.com/innervoid/anubis/pkg/requester"
 )
 
 // ScanLevel represents the aggressiveness of the scan
@@ -146,6 +147,6 @@ type ScanSummary struct {
 type Module interface {
 	Name() string
 	Description() string
-	Level() ScanLevel       // minimum scan level to activate
-	Run(cfg ScanConfig, findings chan<- Finding) error
+	Level() ScanLevel
+	Run(cfg ScanConfig, findings chan<- Finding, client *requester.AnubisClient) error 
 }

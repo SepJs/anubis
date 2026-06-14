@@ -1,0 +1,42 @@
+package main
+
+// Global CLI flags shared across scan commands
+var (
+	target               string
+	level                int
+	modules              []string
+	disabledModules      []string
+	outputFormat         string
+	outputFile           string
+	reportLevel          int
+	timeout              int
+	threads              int
+	rateLimit            int
+	userAgent            string
+	proxyURL             string
+	proxyAuth            string
+	caCert               string
+	sslBypass            bool
+	username             string
+	password             string
+	wordlist             string
+	payloadFile          string
+	authStrategy         string
+	protocols            []string
+	verbose              bool
+	respectLimits        bool
+	quickVuln            bool
+	deepScan             bool
+	frameworkMap         bool
+	frameworkExamples    bool
+	maxFrameworkExamples int
+	showRemediation      bool
+	baselineFile         string
+	showBaselineProgress bool
+	modulePriority       []string
+	batch                bool
+	batchFile            string
+	resume               bool
+	externalAPI          string
+	jsSupport            bool
+)

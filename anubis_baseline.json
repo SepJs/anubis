@@ -1,9 +1,9 @@
 {
   "target": "https://web.rubika.ir/",
-  "captured_at": "2026-06-13T22:58:56.999976587+03:30",
-  "avg_response_time_ms": 176.6,
-  "min_response_time_ms": 173,
-  "max_response_time_ms": 184,
+  "captured_at": "2026-06-14T15:55:29.227496076+03:30",
+  "avg_response_time_ms": 317.6,
+  "min_response_time_ms": 281,
+  "max_response_time_ms": 335,
   "status_code": 200,
   "server_header": "Microsoft-IIS/10.0",
   "content_type": "text/html",
@@ -12,7 +12,7 @@
   "response_headers": {
     "Accept-Ranges": "bytes",
     "Content-Type": "text/html",
-    "Date": "Sat, 13 Jun 2026 19:28:26 GMT",
+    "Date": "Sun, 14 Jun 2026 12:24:57 GMT",
     "Etag": "\"0b0ab362fbdc1:0\"",
     "Last-Modified": "Sat, 13 Jun 2026 06:59:44 GMT",
     "Server": "Microsoft-IIS/10.0",
