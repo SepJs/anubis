@@ -2,7 +2,7 @@
 
 <br>
 
-# Anubis — Advanced Modular Web Security & Auditing Framework
+---
 
 <p align="center">
   <img src="https://img.shields.io/badge/Go-1.21%2B-00ADD8?style=for-the-badge&logo=go" alt="Go Version">
@@ -10,7 +10,11 @@
   <img src="https://img.shields.io/badge/Security-Authorized%20Testing-red?style=for-the-badge" alt="Security Domain">
 </p>
 
----
+<br>
+
+# Anubis — Advanced Modular Web Security & Auditing Framework
+
+<br>
 
 ## 🌐 Overview
 
