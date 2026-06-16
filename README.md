@@ -7,6 +7,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Go-1.21%2B-00ADD8?style=for-the-badge&logo=go" alt="Go Version">
   <img src="https://img.shields.io/badge/Platform-Linux%20%7C%20macOS-000000?style=for-the-badge" alt="Platform">
+  <img src="https://img.shields.io/badge/Updates-Automatic-brightgreen?style=for-the-badge&logo=githubactions" alt="Auto Updates">
   <img src="https://img.shields.io/badge/Security-Authorized%20Testing-red?style=for-the-badge" alt="Security Domain">
 </p>
 
@@ -30,6 +31,9 @@ Built with Go’s concurrency model at its core, Anubis delivers **low-latency, 
 
 Anubis replaces legacy scanning limitations with a modern, concurrent execution pipeline:
 
+* **🔄 Zero-Interaction Auto-Updater (`update.go`)**
+  Intelligent decentralized lifecycle management. Every time Anubis initializes, it securely polls upstream configurations (`version.txt`) and atomically swaps the active global binary under `/usr/local/bin/anubis` if a newer deployment is available.
+
 * **Stateful Worker Pool Engine**
   Efficient Goroutine-based execution with strict rate control and thread isolation under heavy workloads.
 
@@ -41,7 +45,6 @@ Anubis replaces legacy scanning limitations with a modern, concurrent execution 
 
 * **Multi-Format Reporting**
   Export results in:
-
   * `HTML` (interactive dark UI)
   * `JSON`
   * `CSV`
@@ -63,7 +66,7 @@ Anubis replaces legacy scanning limitations with a modern, concurrent execution 
 | ----- | ------------- | ------------------------------------------------------------------- |
 | **0** | Baseline      | Latency mapping, availability checks, environment profiling         |
 | **1** | Passive Recon | Port scan, SSL validation, headers audit, sensitive files detection |
-| **2** | Active Scan   | SQLi, XSS, DNS enumeration, credential brute checks                 |
+| **2** | Active Scan   | SQLi, XSS, DNS enumeration, credential brute checks               |
 | **3** | Deep Audit    | Full fingerprinting, recursive directory analysis                   |
 
 ---
@@ -72,19 +75,13 @@ Anubis replaces legacy scanning limitations with a modern, concurrent execution 
 
 ### 🔹 Automated Installation (Recommended)
 
-```bash
-git clone https://github.com/SepJS/anubis.git
+git clone [https://github.com/SepJS/anubis.git](https://github.com/SepJS/anubis.git)
 cd anubis
 
 chmod +x install.sh
 sudo ./install.sh
-```
-
----
-
-### 🔹 Manual Build
-
-```bash
+🔹 Manual Build
+Bash
 # Install dependencies
 make deps
 
@@ -96,86 +93,56 @@ make install
 
 # Cross-platform builds
 make build-all
-```
-
----
-
-## ⚙️ Core Flags
-
-### Target Configuration
-
-```bash
--t, --target <string>     Target URL, domain, or IP
+⚙️ Core Flags
+Target Configuration
+Bash
+-t, --target <string>    Target URL, domain, or IP
 -l, --level <int>         Scan depth (1–3) [default: 1]
-```
-
-### Performance & Networking
-
-```bash
+-v, --version             Display current version and update manifest metadata
+Performance & Networking
+Bash
 --threads <int>           Concurrent workers [default: 5]
 --timeout <int>           Request timeout (seconds) [default: 30]
 --rate-limit <int>        Delay between requests (ms) [default: 150]
 --proxy <url>             Proxy routing
 --ssl-bypass              Disable strict TLS validation
-```
-
----
-
-## ⚔️ Usage Examples
-
-### Passive Recon (Stealth)
-
-```bash
-anubis -t https://target.com -l 1
-```
-
-### Authenticated Scan
-
-```bash
-anubis -t https://api.target.com -l 2 \
+⚔️ Usage Examples
+Passive Recon (Stealth)
+Bash
+anubis -t [https://target.com](https://target.com) -l 1
+Authenticated Scan
+Bash
+anubis -t [https://api.target.com](https://api.target.com) -l 2 \
   --username "user" --password "secret" \
   --threads 8 \
   --format html+json \
   --output report
-```
-
-### Batch Scanning
-
-```bash
+Batch Scanning
+Bash
 anubis --batch --batch-file scopes.txt --level 2 --rate-limit 250
-```
-
-### Resume Previous Scan
-
-```bash
+Resume Previous Scan
+Bash
 anubis --resume
-```
-
----
-
-## ⚠️ Legal Disclaimer
-
+⚠️ Legal Disclaimer
 This tool is strictly intended for:
 
-* Authorized penetration testing
-* Security research
-* Defensive infrastructure auditing
+Authorized penetration testing
 
-**Unauthorized use against systems without explicit permission is illegal.**
+Security research
 
-The developers assume **no liability** for misuse, damages, or legal consequences resulting from improper deployment.
+Defensive infrastructure auditing
 
----
+Unauthorized use against systems without explicit permission is illegal.
 
-## 🧠 Philosophy
+The developers assume no liability for misuse, damages, or legal consequences resulting from improper deployment.
 
+🧠 Philosophy
 Anubis is engineered with a focus on:
 
-* Precision over noise
-* Controlled concurrency
-* Real-world security workflows
+Precision over noise
 
----
+Controlled concurrency
 
-> **Unknown Xrg**
-> Engineered for Advanced Cybersecurity Operations
+Real-world security workflows
+
+Unknown Xrg > Engineered for Advanced Cybersecurity Operations
