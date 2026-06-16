@@ -75,13 +75,16 @@ Anubis replaces legacy scanning limitations with a modern, concurrent execution 
 
 ### 🔹 Automated Installation (Recommended)
 
+```
 git clone [https://github.com/SepJS/anubis.git](https://github.com/SepJS/anubis.git)
 cd anubis
 
 chmod +x install.sh
 sudo ./install.sh
-🔹 Manual Build
-Bash
+```
+
+### 🔹 Manual Build
+```
 # Install dependencies
 make deps
 
@@ -93,25 +96,37 @@ make install
 
 # Cross-platform builds
 make build-all
-⚙️ Core Flags
-Target Configuration
-Bash
+```
+
+---
+
+
+# ⚙️ Core Flags
+## Target Configuration
+```
 -t, --target <string>    Target URL, domain, or IP
 -l, --level <int>         Scan depth (1–3) [default: 1]
 -v, --version             Display current version and update manifest metadata
-Performance & Networking
-Bash
+```
+
+## Performance & Networking
+```
 --threads <int>           Concurrent workers [default: 5]
 --timeout <int>           Request timeout (seconds) [default: 30]
 --rate-limit <int>        Delay between requests (ms) [default: 150]
 --proxy <url>             Proxy routing
 --ssl-bypass              Disable strict TLS validation
-⚔️ Usage Examples
-Passive Recon (Stealth)
-Bash
+```
+
+---
+
+# ⚔️ Usage Examples
+## Passive Recon (Stealth)
+```
 anubis -t [https://target.com](https://target.com) -l 1
-Authenticated Scan
-Bash
+```
+
+```
 anubis -t [https://api.target.com](https://api.target.com) -l 2 \
   --username "user" --password "secret" \
   --threads 8 \
@@ -123,26 +138,29 @@ anubis --batch --batch-file scopes.txt --level 2 --rate-limit 250
 Resume Previous Scan
 Bash
 anubis --resume
-⚠️ Legal Disclaimer
+```
+
+---
+
+## ⚠️ Legal Disclaimer
+
 This tool is strictly intended for:
+* Authorized penetration testing
+* Security research
+* Defensive infrastructure auditing
 
-Authorized penetration testing
+**Unauthorized use against systems without explicit permission is illegal.**
 
-Security research
+The developers assume **no liability** for misuse, damages, or legal consequences resulting from improper deployment.
 
-Defensive infrastructure auditing
+---
 
-Unauthorized use against systems without explicit permission is illegal.
+## 🧠 Philosophy
 
-The developers assume no liability for misuse, damages, or legal consequences resulting from improper deployment.
-
-🧠 Philosophy
 Anubis is engineered with a focus on:
+* Precision over noise
+* Controlled concurrency
+* Real-world security workflows
 
-Precision over noise
-
-Controlled concurrency
-
-Real-world security workflows
-
-Unknown Xrg > Engineered for Advanced Cybersecurity Operations
+> <font color="#ea1d25">**Unknown Xrg**</font>  
+> <font color="#ea1d25">*Engineered for Advanced Cybersecurity Operations*</font>
