@@ -87,7 +87,7 @@ func PrintBanner() {
 `
 	colorCritical.Println(banner)
 	colorDim.Println("  Security Scanner — Authorized Use Only")
-	colorDim.Printf("  Version 1.0.0\n\n")
+	colorDim.Printf("  Version 1.0.0 | Inner Void Studio\n\n")
 }
 
 func PrintDisclaimer() {

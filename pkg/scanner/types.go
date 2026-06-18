@@ -2,7 +2,6 @@ package scanner
 
 import (
 	"time"
-	"github.com/innervoid/anubis/pkg/requester"
 )
 
 // ScanLevel represents the aggressiveness of the scan
@@ -90,6 +89,9 @@ type ScanConfig struct {
 	Timeout         int
 	Threads         int
 	RateLimit       int
+	DelayStrategy   string // "fixed", "exponential", "linear", "jitter" — see pkg/delay.ParseStrategy
+	MaxDelayMs      int    // cap on backoff growth, passed straight to delay.Limiter.WithMaxDelay
+	AdaptiveDelay   bool   // if true, modules should adjust pacing based on observed response codes
 	UserAgent       string
 	ProxyURL        string
 	ProxyAuth       string
@@ -147,6 +149,6 @@ type ScanSummary struct {
 type Module interface {
 	Name() string
 	Description() string
-	Level() ScanLevel
-	Run(cfg ScanConfig, findings chan<- Finding, client *requester.AnubisClient) error 
+	Level() ScanLevel       // minimum scan level to activate
+	Run(cfg ScanConfig, findings chan<- Finding) error
 }
