@@ -124,44 +124,49 @@ anubis --gendoc
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                    anubis CLI                        │
-├─────────────────────────────────────────────────────┤
-│  ┌─────────┐ ┌──────────┐ ┌────────┐ ┌──────────┐  │
-│  │ Engine  │ │ Evasion  │ │ Proxy  │ │ Heuristic│  │
-│  │ (Worker │ │ (Jitter, │ │ (SOCKS │ │ (AI      │  │
-│  │  Pool)  │ │  Headers)│ │  Rotation│ │ Analysis)│  │
-│  └─────────┘ └──────────┘ └────────┘ └──────────┘  │
-│  ┌─────────┐ ┌──────────┐ ┌────────┐ ┌──────────┐  │
-│  │ Modules │ │ Encoding │ │ Throttle│ │ Discovery│  │
-│  │ (9+1)   │ │ (WAF     │ │ (Token │ │ (Subdomain│  │
-│  │         │ │  Bypass) │ │  Bucket)│ │  Bruteforce)│
-│  └─────────┘ └──────────┘ └────────┘ └──────────┘  │
-│  ┌─────────┐ ┌──────────┐ ┌────────┐ ┌──────────┐  │
-│  │ Report  │ │ Database │ │ gRPC   │ │ Profile   │  │
-│  │ (HTML/  │ │ (SQLite  │ │ (Remote│ │ (CPU/Mem  │  │
-│  │ JSON/CSV)│ │ Encrypted)│ │  Control)│ │  Trace) │  │
-│  └─────────┘ └──────────┘ └────────┘ └──────────┘  │
-└─────────────────────────────────────────────────────┘
-         Zero CGO | Cross-Platform | Static Binary
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│                                    ANUBIS v2.0.0 ENGINE                                 │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│  [ CORE & CONCURRENCY ]   [ EVASION & STEALTH ]     [ NETWORKING ]     [ INTELLIGENCE ] │
+│  ┌────────────────────┐   ┌───────────────────┐    ┌───────────────┐   ┌──────────────┐ │
+│  │ Worker Pool Engine │   │ Jitter & Padding  │    │ Proxy Rotation│   │ AI Latency   │ │
+│  │ Atomic State Mgr   │   │ Header Randomizer │    │ SOCKS5 / HTTP │   │ Analysis     │ │
+│  └────────────────────┘   └───────────────────┘    └───────────────┘   └──────────────┘ │
+│                                                                                         │
+│  [ MODULES & LOGIC ]      [ WAF BYPASS ]           [ RATE CONTROL ]   [ DISCOVERY ]     │
+│  ┌────────────────────┐   ┌───────────────────┐    ┌─────────────┐    ┌──────────────┐  │
+│  │ Plugin Interface   │   │ Multi-Encoding    │    │ Token Bucket│    │ DNS Brute    │  │
+│  │ Module Scheduler   │   │ Payload Obfuscator│    │ Polymorphic │    │ Passive Src  │  │
+│  └────────────────────┘   └───────────────────┘    └─────────────┘    └──────────────┘  │
+│                                                                                         │
+│  [ DATA & INTEGRATION ]   [ STORAGE ]              [ CONTROL API ]    [ DIAGNOSTICS ]   │
+│  ┌────────────────────┐   ┌───────────────────┐    ┌─────────────┐    ┌──────────────┐  │
+│  │ CVSS/Risk Engine   │   │ Encrypted SQLite  │    │ gRPC Service│    │ CPU/Mem/Trace│  │
+│  │ HTML/JSON/CSV Gen  │   │ History Records   │    │ TLS Auth    │    │ Prof-Mode    │  │
+│  └────────────────────┘   └───────────────────┘    └─────────────┘    └──────────────┘  │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│          Zero-CGO | Static Binary | Cross-Platform | Panic Recovery | Hardened          │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
 ## Modules
 
-| Module | Level | Description |
-|--------|-------|-------------|
-| PORT_SCAN | 1 | TCP port scanning with service detection |
-| SSL_CHECK | 1 | TLS/SSL certificate analysis |
-| HEADERS | 1 | HTTP security headers audit |
-| SENSITIVE_FILES | 1 | Sensitive file/directory discovery |
-| DNS | 2 | DNS enumeration and subdomain discovery |
-| SQLI | 2 | SQL injection detection |
-| XSS | 2 | Cross-site scripting detection |
-| BRUTE_FORCE | 2 | Default credential testing |
-| FINGERPRINT | 3 | Web stack fingerprinting |
-| DISCOVERY | 2 | Passive + brute-force subdomain discovery |
+-----------------------------------------------------------------------
+|     Module      | Level |               Description                 |
+|-----------------|-------|-------------------------------------------|
+| PORT_SCAN       |   1   | TCP port scanning with service detection  |
+| SSL_CHECK       |   1   | TLS/SSL certificate analysis              |
+| HEADERS         |   1   | HTTP security headers audit               |
+| SENSITIVE_FILES |   1   | Sensitive file/directory discovery        |
+| DNS             |   2   | DNS enumeration and subdomain discovery   |
+| SQLI            |   2   | SQL injection detection                   |
+| XSS             |   2   | Cross-site scripting detection            |
+| BRUTE_FORCE     |   2   | Default credential testing                |
+| FINGERPRINT     |   3   | Web stack fingerprinting                  |
+| DISCOVERY       |   2   | Passive + brute-force subdomain discovery |
+-----------------------------------------------------------------------
 
 ---
 
