@@ -1,0 +1,86 @@
+# Anubis v2.0 — Default Configuration
+# Advanced Security Scanner Configuration
+
+version: "2.0"
+
+scan:
+  default_level: 2
+  default_threads: 10
+  default_timeout: 30
+  delay_strategy: "polymorphic"
+  rate_limit: 150
+  max_delay_ms: 60000
+  adaptive_delay: true
+  output_format: "html+json"
+  report_level: "comprehensive"
+  default_modules: []
+  disabled_modules: []
+
+evasion:
+  jitter_enabled: true
+  jitter_variance: 0.3
+  user_agent_rotate: true
+  fingerprint_mimic: "random"
+  packet_padding: true
+  min_padding_bytes: 8
+  max_padding_bytes: 64
+  ghost_mode: false
+  anti_sandbox_detect: true
+
+proxy:
+  enabled: false
+  rotate_every: 5
+  proxies: []
+  health_check: true
+  max_fails: 3
+
+database:
+  enabled: true
+  path: "anubis_history.db"
+  encrypt: false
+  passkey: ""
+
+api:
+  enabled: false
+  grpc_listen: "127.0.0.1:9000"
+  tls_cert: ""
+  tls_key: ""
+  auth_token: ""
+
+logging:
+  level: "info"
+  file: "anubis.log"
+  json: false
+  crash_log: "crash.log"
+
+profiles:
+  - name: "stealth"
+    config:
+      target: ""
+      level: 1
+      threads: 3
+      timeout: 45
+      delay_strategy: "polymorphic"
+      rate_limit: 500
+      adaptive_delay: true
+      ghost_mode: true
+  - name: "aggressive"
+    config:
+      target: ""
+      level: 3
+      threads: 50
+      timeout: 15
+      delay_strategy: "fixed"
+      rate_limit: 10
+      adaptive_delay: false
+      ghost_mode: false
+  - name: "default"
+    config:
+      target: ""
+      level: 2
+      threads: 10
+      timeout: 30
+      delay_strategy: "jitter"
+      rate_limit: 150
+      adaptive_delay: true
+      ghost_mode: false

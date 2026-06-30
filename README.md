@@ -1,6 +1,6 @@
-# Anubis
+# Anubis v2.0
 
-> Modular web application security scanner — authorized use only.
+> Elite modular security scanner — AI-driven heuristics, polymorphic evasion, zero-CGO architecture.
 
 ```
   █████╗ ███╗   ██╗██╗   ██╗██████╗ ██╗███████╗
@@ -11,177 +11,194 @@
  ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚═════╝ ╚═╝╚══════╝
 ```
 
-**Author:** Vladimir Unknown  
-**GitHub:** [SepJs/anubis](https://github.com/SepJs/anubis)
+**Version:** 2.0.0 | **Author:** Vladimir Unknown | **License:** MIT
 
 ---
 
-## Install
+## Features
 
-Requires **Go 1.21+**
+| Category | Capabilities |
+|----------|-------------|
+| **Engine** | Worker-pool concurrency, atomic state, context cancellation, zero memory leaks |
+| **Evasion** | Polymorphic jitter, randomized delays, packet padding, DPI bypass |
+| **Proxy** | SOCKS5/HTTP/HTTPS rotation, health checking, automatic failover |
+| **Stealth** | Ghost mode, browser fingerprint spoofing, cURL/Wget mimicry |
+| **Adaptive** | AI-driven latency analysis, trend-based speed adjustment, anti-rate-limit |
+| **Scanner** | 9 modules + subdomain discovery, CVSS scoring, heuristic likelihood analysis |
+| **Reporting** | HTML (risk meter, CVSS vectors), JSON, CSV + encrypted SQLite history |
+| **API** | gRPC remote control with TLS + token auth |
+| **WAF Bypass** | Double URL encoding, nested Base64, Unicode escape, comment injection |
+| **Anti-Sandbox** | Honeypot detection, sandbox environment identification |
+| **Security** | Input sanitization, panic recovery → crash.log, stripped+PIE binary |
+| **Platform** | Linux/Windows/macOS, zero CGO dependencies, fully static binaries |
 
+---
+
+## Quick Install
+
+### Linux / macOS
 ```bash
 git clone https://github.com/SepJs/anubis
 cd anubis
-make deps
-make build
+make deps build
 sudo cp anubis /usr/local/bin/
 ```
 
-> Version shown in `--version` is stamped automatically from the latest Git
-> tag at build time. If you clone without any tags, it shows `dev`.
+### macOS (Homebrew)
+```bash
+# Coming soon to a tap near you
+brew install SepJs/anubis/anubis
+```
+
+### Windows (PowerShell)
+```powershell
+Set-ExecutionPolicy Bypass -Scope Process -Force
+iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/SepJs/anubis/main/install.ps1'))
+```
 
 ---
 
 ## Usage
 
+### Basic Scanning
 ```bash
-# Level 1 — passive reconnaissance (5-minute limit)
+# Passive recon (stealth)
 anubis -t https://example.com -l 1
 
-# Level 2 — active scanning
-anubis -t https://example.com -l 2 -v
+# Active scanning with ghost mode
+anubis -t https://example.com -l 2 --ghost --strategy polymorphic
 
-# Level 3 — deep scan, all modules
-anubis -t https://example.com -l 3 --format html+json
+# Deep aggressive scan
+anubis -t https://example.com -l 3 --threads 20 --deep-scan
+```
 
-# Through Burp proxy
-anubis -t https://example.com -l 2 --proxy http://127.0.0.1:8080 --ssl-bypass
+### Evasion & Stealth
+```bash
+# Ghost mode — zero stdout findings, minimal requests
+anubis -t https://example.com -l 2 --ghost
 
-# Batch scan (one target per line)
-anubis --batch --batch-file targets.txt -l 1
+# Proxy rotation (SOCKS5)
+anubis -t https://example.com --proxy socks5://127.0.0.1:9050
+
+# Polymorphic delay — rotates between 4 delay patterns
+anubis -t https://example.com -l 2 --strategy polymorphic
+
+# Randomized jitter with custom variance
+anubis -t https://example.com -l 2 --strategy randomized
+
+# Full stealth profile from config
+anubis -c templates/default.yaml -t https://example.com
+```
+
+### Configuration
+```bash
+# Use YAML config with profiles
+anubis -c myconfig.yaml -t https://example.com -l 2
+
+# Example config profiles:
+#   stealth   — 3 threads, 500ms delay, ghost mode, polymorphic
+#   aggressive — 50 threads, 10ms delay, fixed strategy
+#   default   — 10 threads, 150ms delay, jitter strategy
+```
+
+### Advanced Features
+```bash
+# Profile mode (CPU/mem/trace)
+anubis -t https://example.com -l 1 --profile
 
 # Resume interrupted scan
 anubis --resume
 
-# Check for / install update
-anubis --check-update
+# Batch scan targets
+anubis --batch --batch-file targets.txt -l 1
+
+# Update to latest version
 anubis --update
-```
 
-Reports are saved automatically to the `reports/` directory.
-
----
-
-## Scan Levels
-
-| Level | Modules | Notes |
-|-------|---------|-------|
-| **1** | PORT_SCAN, SSL_CHECK, HEADERS, SENSITIVE_FILES | Passive-ish, 5-min time limit |
-| **2** | + DNS, SQLI, XSS, BRUTE_FORCE | Active scanning |
-| **3** | + FINGERPRINT | Full deep scan |
-
----
-
-## Flags
-
-```
-Target:
-  -t, --target STRING      Target URL (required)
-  -l, --level INT          Scan level 1-3 (default: 1)
-
-Output:
-  --format STRING          json, html, csv — combine with + (default: html+json)
-  -o, --output STRING      Output file name (default: auto in reports/)
-  --report-level STRING    basic | detailed | comprehensive (default: comprehensive)
-
-Connection:
-  --timeout INT            HTTP timeout in seconds (default: 30)
-  --threads INT            Concurrent workers (default: 5)
-  --rate-limit INT         Delay between requests in ms (default: 150)
-  --strategy STRING        fixed | exponential | linear | jitter (default: jitter)
-  --max-delay INT          Maximum delay cap in ms (default: 60000)
-  --adaptive-delay         Auto-adjust delay on 429/503 responses
-  --proxy URL              Proxy URL
-  --ssl-bypass             Skip TLS certificate validation
-
-Auth:
-  -u, --username STRING
-  -p, --password STRING
-  --auth-strategy STRING   none | defaults | bruteforce | combined (default: defaults)
-
-Modules:
-  --modules STRING         Run only these modules (comma-separated)
-  --disable-modules STRING Skip these modules
-
-Behavior:
-  -v, --verbose            Debug output
-  --respect-limits         Respect robots.txt
-  --deep-scan              More thorough per-module scanning
-
-Update:
-  --check-update           Check GitHub for newer release (no download)
-  --update                 Download and install latest release
-
-Other:
-  --resume                 Resume from last checkpoint
-  --batch --batch-file F   Scan multiple targets from file
-  --version                Print version and exit
+# Generate documentation
+anubis --gendoc
 ```
 
 ---
 
-## Reports
-
-All reports go to `reports/` — created automatically on first scan.
+## Architecture
 
 ```
-reports/
-├── anubis_example_com_20260618_143022.html   ← full HTML report
-├── anubis_example_com_20260618_143022.json   ← machine-readable
-└── anubis_baseline.json                      ← baseline for comparison
+┌─────────────────────────────────────────────────────┐
+│                    anubis CLI                        │
+├─────────────────────────────────────────────────────┤
+│  ┌─────────┐ ┌──────────┐ ┌────────┐ ┌──────────┐  │
+│  │ Engine  │ │ Evasion  │ │ Proxy  │ │ Heuristic│  │
+│  │ (Worker │ │ (Jitter, │ │ (SOCKS │ │ (AI      │  │
+│  │  Pool)  │ │  Headers)│ │  Rotation│ │ Analysis)│  │
+│  └─────────┘ └──────────┘ └────────┘ └──────────┘  │
+│  ┌─────────┐ ┌──────────┐ ┌────────┐ ┌──────────┐  │
+│  │ Modules │ │ Encoding │ │ Throttle│ │ Discovery│  │
+│  │ (9+1)   │ │ (WAF     │ │ (Token │ │ (Subdomain│  │
+│  │         │ │  Bypass) │ │  Bucket)│ │  Bruteforce)│
+│  └─────────┘ └──────────┘ └────────┘ └──────────┘  │
+│  ┌─────────┐ ┌──────────┐ ┌────────┐ ┌──────────┐  │
+│  │ Report  │ │ Database │ │ gRPC   │ │ Profile   │  │
+│  │ (HTML/  │ │ (SQLite  │ │ (Remote│ │ (CPU/Mem  │  │
+│  │ JSON/CSV)│ │ Encrypted)│ │  Control)│ │  Trace) │  │
+│  └─────────┘ └──────────┘ └────────┘ └──────────┘  │
+└─────────────────────────────────────────────────────┘
+         Zero CGO | Cross-Platform | Static Binary
 ```
 
-To compare against a saved baseline:
+---
+
+## Modules
+
+| Module | Level | Description |
+|--------|-------|-------------|
+| PORT_SCAN | 1 | TCP port scanning with service detection |
+| SSL_CHECK | 1 | TLS/SSL certificate analysis |
+| HEADERS | 1 | HTTP security headers audit |
+| SENSITIVE_FILES | 1 | Sensitive file/directory discovery |
+| DNS | 2 | DNS enumeration and subdomain discovery |
+| SQLI | 2 | SQL injection detection |
+| XSS | 2 | Cross-site scripting detection |
+| BRUTE_FORCE | 2 | Default credential testing |
+| FINGERPRINT | 3 | Web stack fingerprinting |
+| DISCOVERY | 2 | Passive + brute-force subdomain discovery |
+
+---
+
+## Packaging
+
+### Homebrew (macOS/Linux)
 ```bash
-anubis -t https://example.com -l 1 --baseline reports/anubis_baseline.json
+# Local tap
+brew install --HEAD ./anubis.rb
+
+# Future: official tap
+brew tap SepJs/anubis
+brew install anubis
 ```
 
----
-
-## Auto-Update
-
-Every scan run does a background update check against GitHub releases. If a
-newer version is available, you'll see a one-line notice after scan startup.
-
-To actually update:
-```bash
-anubis --update   # confirms before replacing the binary; backup saved as .anubis-previous
+### PowerShell Gallery (Windows)
+```powershell
+# One-liner install
+iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/SepJs/anubis/main/install.ps1'))
 ```
 
-Version is synced with Git release tags. To release a new version:
-```bash
-make release TAG=v1.2.0   # requires gh CLI installed
+### Docker
+```dockerfile
+FROM golang:1.21-alpine AS build
+RUN apk add --no-cache git
+COPY . /src
+WORKDIR /src
+RUN CGO_ENABLED=0 go build -o /anubis ./cmd/anubis
+
+FROM alpine:3.19
+RUN apk add --no-cache ca-certificates
+COPY --from=build /anubis /usr/local/bin/anubis
+ENTRYPOINT ["anubis"]
 ```
-
-This tags, pushes, cross-compiles, and creates the GitHub release in one step.
-
----
-
-## Adding a Module
-
-```go
-// pkg/modules/mymodule/mymodule.go
-package mymodule
-
-import "github.com/SepJs/anubis/pkg/scanner"
-
-type Module struct{}
-func New() *Module { return &Module{} }
-func (m *Module) Name() string             { return "MY_MODULE" }
-func (m *Module) Description() string      { return "Does something useful" }
-func (m *Module) Level() scanner.ScanLevel { return scanner.Level2 }
-func (m *Module) Run(cfg scanner.ScanConfig, findings chan<- scanner.Finding) error {
-    findings <- scanner.Finding{ Title: "Found X", Severity: scanner.SeverityHigh, /* ... */ }
-    return nil
-}
-```
-
-Then add `mymodule.New()` to `allModules()` in `cmd/anubis/scan.go`.
 
 ---
 
 ## Disclaimer
 
-This tool is for **authorized security testing only**.  
-Scanning systems you don't own or have written permission to test is illegal.
+This tool is for **authorized security testing only**. Scanning systems you don't own or have written permission to test is illegal. The author assumes no liability for misuse.
