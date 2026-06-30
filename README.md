@@ -127,23 +127,23 @@ anubis --gendoc
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
 │                                    ANUBIS v2.0.0 ENGINE                                 │
 ├─────────────────────────────────────────────────────────────────────────────────────────┤
-│  [ CORE & CONCURRENCY ]   [ EVASION & STEALTH ]     [ NETWORKING ]     [ INTELLIGENCE ] │
+│  [ CORE & CONCURRENCY ]   [ EVASION & STEALTH ]    [  NETWORKING   ]   [ INTELLIGENCE ] │
 │  ┌────────────────────┐   ┌───────────────────┐    ┌───────────────┐   ┌──────────────┐ │
 │  │ Worker Pool Engine │   │ Jitter & Padding  │    │ Proxy Rotation│   │ AI Latency   │ │
 │  │ Atomic State Mgr   │   │ Header Randomizer │    │ SOCKS5 / HTTP │   │ Analysis     │ │
 │  └────────────────────┘   └───────────────────┘    └───────────────┘   └──────────────┘ │
 │                                                                                         │
-│  [ MODULES & LOGIC ]      [ WAF BYPASS ]           [ RATE CONTROL ]   [ DISCOVERY ]     │
-│  ┌────────────────────┐   ┌───────────────────┐    ┌─────────────┐    ┌──────────────┐  │
-│  │ Plugin Interface   │   │ Multi-Encoding    │    │ Token Bucket│    │ DNS Brute    │  │
-│  │ Module Scheduler   │   │ Payload Obfuscator│    │ Polymorphic │    │ Passive Src  │  │
-│  └────────────────────┘   └───────────────────┘    └─────────────┘    └──────────────┘  │
+│  [  MODULES & LOGIC   ]   [     WAF BYPASS    ]    [ RATE CONTROL ]    [  DISCOVERY  ]  │
+│  ┌────────────────────┐   ┌───────────────────┐    ┌──────────────┐    ┌─────────────┐  │
+│  │ Plugin Interface   │   │ Multi-Encoding    │    │ Token Bucket │    │ DNS Brute   │  │
+│  │ Module Scheduler   │   │ Payload Obfuscator│    │ Polymorphic  │    │ Passive Src │  │
+│  └────────────────────┘   └───────────────────┘    └──────────────┘    └─────────────┘  │
 │                                                                                         │
-│  [ DATA & INTEGRATION ]   [ STORAGE ]              [ CONTROL API ]    [ DIAGNOSTICS ]   │
-│  ┌────────────────────┐   ┌───────────────────┐    ┌─────────────┐    ┌──────────────┐  │
-│  │ CVSS/Risk Engine   │   │ Encrypted SQLite  │    │ gRPC Service│    │ CPU/Mem/Trace│  │
-│  │ HTML/JSON/CSV Gen  │   │ History Records   │    │ TLS Auth    │    │ Prof-Mode    │  │
-│  └────────────────────┘   └───────────────────┘    └─────────────┘    └──────────────┘  │
+│  [ DATA & INTEGRATION ]   [      STORAGE      ]    [ CONTROL API ]     [ DIAGNOSTICS ]  │
+│  ┌────────────────────┐   ┌───────────────────┐    ┌─────────────┐     ┌──────────────┐ │
+│  │ CVSS/Risk Engine   │   │ Encrypted SQLite  │    │ gRPC Service│     │ CPU/Mem/Trace│ │
+│  │ HTML/JSON/CSV Gen  │   │ History Records   │    │ TLS Auth    │     │ Prof-Mode    │ │
+│  └────────────────────┘   └───────────────────┘    └─────────────┘     └──────────────┘ │
 ├─────────────────────────────────────────────────────────────────────────────────────────┤
 │          Zero-CGO | Static Binary | Cross-Platform | Panic Recovery | Hardened          │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
