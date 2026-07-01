@@ -17,7 +17,6 @@
 
 ## Features
 
-‍‍```bash
 ╔══════════════════╤══════════════════════════════════════════════════════════════════════════════════════════╗
 ║     Category     │                         Capabilities                                                     ║
 ╠══════════════════╪══════════════════════════════════════════════════════════════════════════════════════════╣
@@ -128,6 +127,9 @@ anubis --gendoc
 ## Architecture
 
 
+## 🏗️ Architecture
+
+```text
 ╭──────────────────────────────────────────────────────────────────────────────────╮
 │                              🔥  ANUBIS  🔥                                      │
 ├──────────────┬───────────────────────────────────────────────────────────────────┤
@@ -158,13 +160,15 @@ anubis --gendoc
 │ ANTI-SANDBOX │ Honeypot detection │ Sandbox environment identification           │
 ├──────────────┼───────────────────────────────────────────────────────────────────┤
 │ SECURITY     │ Input sanitization │ Panic recovery → crash.log                   │
-│              │ stripped+PIE binary                                               │
+│              │ Stripped + PIE binary                                             │
 ├──────────────┼───────────────────────────────────────────────────────────────────┤
-│ PLATFORM     │ Linux/Windows/macOS │ Zero CGO dependencies                       │
+│ PLATFORM     │ Linux / Windows / macOS │ Zero CGO dependencies                   │
 │              │ Fully static binaries                                             │
 ├──────────────┴───────────────────────────────────────────────────────────────────┤
-│                    ⚡ Zero CGO │ 🌍 Cross-Platform │ 📦 Static                    │
+│              ⚡ Zero CGO │ 🌍 Cross-Platform │ 📦 Static                          │
 ╰──────────────────────────────────────────────────────────────────────────────────╯
+```
+
 
 
 ---
@@ -174,21 +178,20 @@ anubis --gendoc
 
 ## 🔍 Scan Modules
 
-| Module              | Level  | Description                                        |
-| ------------------- | ------ | -------------------------------------------------- |
-| **PORT_SCAN**       | ⚪ L1  | TCP port scanning with service detection           |
-| **SSL_CHECK**       | ⚪ L1  | TLS/SSL certificate analysis                       |
-| **HEADERS**         | ⚪ L1  | HTTP security headers audit                        |
-| **SENSITIVE_FILES** | ⚪ L1  | Sensitive file and directory discovery             |
-| --------------      | ------ | -------------------------------------------------- |
-| **DNS**             | 🟡 L2  | DNS enumeration and subdomain discovery            |
-| **SQLI**            | 🟡 L2  | SQL injection detection                            |
-| **XSS**             | 🟡 L2  | Cross-site scripting detection                     |
-| **BRUTE_FORCE**     | 🟡 L2  | Default credential testing                         |
-| **DISCOVERY**       | 🟡 L2  | Passive + brute-force subdomain discovery          |
-| --------------      | ------ | -------------------------------------------------- |
-| **FINGERPRINT**     | 🔴 L3  | Web stack fingerprinting                           |
-
+---------------------------------------------------------------------------
+| Module              | Level | Description                               |
+| ------------------- | ----- | ----------------------------------------- |
+| **PORT_SCAN**       | ⚪ L1  | TCP port scanning with service detection |
+| **SSL_CHECK**       | ⚪ L1  | TLS/SSL certificate analysis             |
+| **HEADERS**         | ⚪ L1  | HTTP security headers audit              |
+| **SENSITIVE_FILES** | ⚪ L1  | Sensitive file and directory discovery   |
+| **DNS**             | 🟡 L2 | DNS enumeration and subdomain discovery   |
+| **SQLI**            | 🟡 L2 | SQL injection detection                   |
+| **XSS**             | 🟡 L2 | Cross-site scripting detection            |
+| **BRUTE_FORCE**     | 🟡 L2 | Default credential testing                |
+| **DISCOVERY**       | 🟡 L2 | Passive + brute-force subdomain discovery |
+| **FINGERPRINT**     | 🔴 L3 | Web stack fingerprinting                  |
+---------------------------------------------------------------------------
 ---
 
 ### 📊 Levels Overview
@@ -198,8 +201,6 @@ anubis --gendoc
 * 🔴 **L3 – Deep**: Advanced fingerprinting and deep inspection
 
 **Total Modules:** 9
-
-
 
 ---
 
