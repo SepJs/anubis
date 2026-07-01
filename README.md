@@ -172,27 +172,33 @@ anubis --gendoc
 ## Modules
 
 ```
-╭─────────────────────────────────────────────────────────────────────────────────╮
-│                          🔍  SCAN MODULES  🔍                                   │
-├──────────────┬─────────┬────────────────────────────────────────────────────────┤
-│ MODULE       │ LEVEL   │ DESCRIPTION                                            │
-├──────────────┼─────────┼────────────────────────────────────────────────────────┤
-│ PORT_SCAN    │  ⚪ 1   │ TCP port scanning with service detection               │
-│ SSL_CHECK    │  ⚪ 1   │ TLS/SSL certificate analysis                           │
-│ HEADERS      │  ⚪ 1   │ HTTP security headers audit                            │
-│ SENSITIVE    │  ⚪ 1   │ Sensitive file/directory discovery                     │
-│ _FILES       │         │                                                        │
-├──────────────┼─────────┼────────────────────────────────────────────────────────┤
-│ DNS          │  🟡 2   │ DNS enumeration and subdomain discovery                │
-│ SQLI         │  🟡 2   │ SQL injection detection                                │
-│ XSS          │  🟡 2   │ Cross-site scripting detection                         │
-│ BRUTE_FORCE  │  🟡 2   │ Default credential testing                             │
-│ DISCOVERY    │  🟡 2   │ Passive + brute-force subdomain discovery              │
-├──────────────┼─────────┼────────────────────────────────────────────────────────┤
-│ FINGERPRINT  │  🔴 3   │ Web stack fingerprinting                               │
-├──────────────┴─────────┴────────────────────────────────────────────────────────┤
-│  9 modules  │  ⚪ L1: Recon  │  🟡 L2: Attack  │  🔴 L3: Deep                   │
-╰─────────────────────────────────────────────────────────────────────────────────╯
+## 🔍 Scan Modules
+
+| Module              | Level  | Description                                        |
+| ------------------- | ------ | -------------------------------------------------- |
+| **PORT_SCAN**       | ⚪ L1  | TCP port scanning with service detection           |
+| **SSL_CHECK**       | ⚪ L1  | TLS/SSL certificate analysis                       |
+| **HEADERS**         | ⚪ L1  | HTTP security headers audit                        |
+| **SENSITIVE_FILES** | ⚪ L1  | Sensitive file and directory discovery             |
+| --------------      | ------ | -------------------------------------------------- |
+| **DNS**             | 🟡 L2  | DNS enumeration and subdomain discovery            |
+| **SQLI**            | 🟡 L2  | SQL injection detection                            |
+| **XSS**             | 🟡 L2  | Cross-site scripting detection                     |
+| **BRUTE_FORCE**     | 🟡 L2  | Default credential testing                         |
+| **DISCOVERY**       | 🟡 L2  | Passive + brute-force subdomain discovery          |
+| --------------      | ------ | -------------------------------------------------- |
+| **FINGERPRINT**     | 🔴 L3  | Web stack fingerprinting                           |
+
+---
+
+### 📊 Levels Overview
+
+* ⚪ **L1 – Recon**: Basic reconnaissance and passive analysis
+* 🟡 **L2 – Attack**: Active vulnerability testing
+* 🔴 **L3 – Deep**: Advanced fingerprinting and deep inspection
+
+**Total Modules:** 9
+
 ```
 
 ---
