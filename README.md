@@ -229,4 +229,4 @@ ENTRYPOINT ["anubis"]
 
 ## Disclaimer
 
-This tool is for **authorized security testing only**. Scanning systems you don't own or have written permission to test is illegal. The author assumes no liability for misuse.
+This tool is for **authorized security testing only**. Scanning systems you don't own or have written permission to test is illegal. The author assumes no liability for misuse. 
