@@ -17,20 +17,22 @@
 
 ## Features
 
-| Category | Capabilities |
-|----------|-------------|
-| **Engine** | Worker-pool concurrency, atomic state, context cancellation, zero memory leaks |
-| **Evasion** | Polymorphic jitter, randomized delays, packet padding, DPI bypass |
-| **Proxy** | SOCKS5/HTTP/HTTPS rotation, health checking, automatic failover |
-| **Stealth** | Ghost mode, browser fingerprint spoofing, cURL/Wget mimicry |
-| **Adaptive** | AI-driven latency analysis, trend-based speed adjustment, anti-rate-limit |
-| **Scanner** | 9 modules + subdomain discovery, CVSS scoring, heuristic likelihood analysis |
-| **Reporting** | HTML (risk meter, CVSS vectors), JSON, CSV + encrypted SQLite history |
-| **API** | gRPC remote control with TLS + token auth |
-| **WAF Bypass** | Double URL encoding, nested Base64, Unicode escape, comment injection |
-| **Anti-Sandbox** | Honeypot detection, sandbox environment identification |
-| **Security** | Input sanitization, panic recovery → crash.log, stripped+PIE binary |
-| **Platform** | Linux/Windows/macOS, zero CGO dependencies, fully static binaries |
+╔══════════════════╤══════════════════════════════════════════════════════════════════════════════════════════╗
+║     Category     │                         Capabilities                                                     ║
+╠══════════════════╪══════════════════════════════════════════════════════════════════════════════════════════╣
+║ Engine           │ Worker-pool concurrency, atomic state, context cancellation, zero memory leaks           ║
+║ Evasion          │ Polymorphic jitter, randomized delays, packet padding, DPI bypass                        ║
+║ Proxy            │ SOCKS5/HTTP/HTTPS rotation, health checking, automatic failover                          ║
+║ Stealth          │ Ghost mode, browser fingerprint spoofing, cURL/Wget mimicry                              ║
+║ Adaptive         │ AI-driven latency analysis, trend-based speed adjustment, anti-rate-limit                ║
+║ Scanner          │ 9 modules + subdomain discovery, CVSS scoring, heuristic likelihood analysis             ║
+║ Reporting        │ HTML (risk meter, CVSS vectors), JSON, CSV + encrypted SQLite history                    ║
+║ API              │ gRPC remote control with TLS + token auth                                                ║
+║ WAF Bypass       │ Double URL encoding, nested Base64, Unicode escape, comment injection                    ║
+║ Anti-Sandbox     │ Honeypot detection, sandbox environment identification                                   ║
+║ Security         │ Input sanitization, panic recovery → crash.log, stripped+PIE binary                      ║
+║ Platform         │ Linux/Windows/macOS, zero CGO dependencies, fully static binaries                        ║
+╚══════════════════╧══════════════════════════════════════════════════════════════════════════════════════════╝
 
 ---
 
@@ -124,44 +126,70 @@ anubis --gendoc
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                    anubis CLI                        │
-├─────────────────────────────────────────────────────┤
-│  ┌─────────┐ ┌──────────┐ ┌────────┐ ┌──────────┐  │
-│  │ Engine  │ │ Evasion  │ │ Proxy  │ │ Heuristic│  │
-│  │ (Worker │ │ (Jitter, │ │ (SOCKS │ │ (AI      │  │
-│  │  Pool)  │ │  Headers)│ │  Rotation│ │ Analysis)│  │
-│  └─────────┘ └──────────┘ └────────┘ └──────────┘  │
-│  ┌─────────┐ ┌──────────┐ ┌────────┐ ┌──────────┐  │
-│  │ Modules │ │ Encoding │ │ Throttle│ │ Discovery│  │
-│  │ (9+1)   │ │ (WAF     │ │ (Token │ │ (Subdomain│  │
-│  │         │ │  Bypass) │ │  Bucket)│ │  Bruteforce)│
-│  └─────────┘ └──────────┘ └────────┘ └──────────┘  │
-│  ┌─────────┐ ┌──────────┐ ┌────────┐ ┌──────────┐  │
-│  │ Report  │ │ Database │ │ gRPC   │ │ Profile   │  │
-│  │ (HTML/  │ │ (SQLite  │ │ (Remote│ │ (CPU/Mem  │  │
-│  │ JSON/CSV)│ │ Encrypted)│ │  Control)│ │  Trace) │  │
-│  └─────────┘ └──────────┘ └────────┘ └──────────┘  │
-└─────────────────────────────────────────────────────┘
-         Zero CGO | Cross-Platform | Static Binary
+╭──────────────────────────────────────────────────────────────────────────────────╮
+│                              🔥  ANUBIS  🔥                                      │
+├──────────────┬───────────────────────────────────────────────────────────────────┤
+│ ENGINE       │ Worker-pool concurrency │ Atomic state │ Context cancellation     │
+│              │ Zero memory leaks                                                 │
+├──────────────┼───────────────────────────────────────────────────────────────────┤
+│ EVASION      │ Polymorphic jitter │ Randomized delays │ Packet padding           │
+│              │ DPI bypass                                                        │
+├──────────────┼───────────────────────────────────────────────────────────────────┤
+│ PROXY        │ SOCKS5/HTTP/HTTPS rotation │ Health checking │ Auto failover      │
+├──────────────┼───────────────────────────────────────────────────────────────────┤
+│ STEALTH      │ Ghost mode │ Browser fingerprint spoofing │ cURL/Wget mimicry     │
+├──────────────┼───────────────────────────────────────────────────────────────────┤
+│ ADAPTIVE     │ AI-driven latency analysis │ Trend-based speed adjustment         │
+│              │ Anti-rate-limit                                                   │
+├──────────────┼───────────────────────────────────────────────────────────────────┤
+│ SCANNER      │ 9 modules + subdomain discovery │ CVSS scoring                    │
+│              │ Heuristic likelihood analysis                                     │
+├──────────────┼───────────────────────────────────────────────────────────────────┤
+│ REPORTING    │ HTML (risk meter, CVSS vectors) │ JSON │ CSV                      │
+│              │ Encrypted SQLite history                                          │
+├──────────────┼───────────────────────────────────────────────────────────────────┤
+│ API          │ gRPC remote control with TLS + token auth                         │
+├──────────────┼───────────────────────────────────────────────────────────────────┤
+│ WAF BYPASS   │ Double URL encoding │ Nested Base64 │ Unicode escape              │
+│              │ Comment injection                                                 │
+├──────────────┼───────────────────────────────────────────────────────────────────┤
+│ ANTI-SANDBOX │ Honeypot detection │ Sandbox environment identification           │
+├──────────────┼───────────────────────────────────────────────────────────────────┤
+│ SECURITY     │ Input sanitization │ Panic recovery → crash.log                   │
+│              │ stripped+PIE binary                                               │
+├──────────────┼───────────────────────────────────────────────────────────────────┤
+│ PLATFORM     │ Linux/Windows/macOS │ Zero CGO dependencies                       │
+│              │ Fully static binaries                                             │
+├──────────────┴───────────────────────────────────────────────────────────────────┤
+│                    ⚡ Zero CGO │ 🌍 Cross-Platform │ 📦 Static                    │
+╰──────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ---
 
 ## Modules
 
-| Module | Level | Description |
-|--------|-------|-------------|
-| PORT_SCAN | 1 | TCP port scanning with service detection |
-| SSL_CHECK | 1 | TLS/SSL certificate analysis |
-| HEADERS | 1 | HTTP security headers audit |
-| SENSITIVE_FILES | 1 | Sensitive file/directory discovery |
-| DNS | 2 | DNS enumeration and subdomain discovery |
-| SQLI | 2 | SQL injection detection |
-| XSS | 2 | Cross-site scripting detection |
-| BRUTE_FORCE | 2 | Default credential testing |
-| FINGERPRINT | 3 | Web stack fingerprinting |
-| DISCOVERY | 2 | Passive + brute-force subdomain discovery |
+╭─────────────────────────────────────────────────────────────────────────────────╮
+│                          🔍  SCAN MODULES  🔍                                   │
+├──────────────┬─────────┬────────────────────────────────────────────────────────┤
+│ MODULE       │ LEVEL   │ DESCRIPTION                                            │
+├──────────────┼─────────┼────────────────────────────────────────────────────────┤
+│ PORT_SCAN    │  ⚪ 1   │ TCP port scanning with service detection               │
+│ SSL_CHECK    │  ⚪ 1   │ TLS/SSL certificate analysis                           │
+│ HEADERS      │  ⚪ 1   │ HTTP security headers audit                            │
+│ SENSITIVE    │  ⚪ 1   │ Sensitive file/directory discovery                     │
+│ _FILES       │         │                                                        │
+├──────────────┼─────────┼────────────────────────────────────────────────────────┤
+│ DNS          │  🟡 2   │ DNS enumeration and subdomain discovery                │
+│ SQLI         │  🟡 2   │ SQL injection detection                                │
+│ XSS          │  🟡 2   │ Cross-site scripting detection                         │
+│ BRUTE_FORCE  │  🟡 2   │ Default credential testing                             │
+│ DISCOVERY    │  🟡 2   │ Passive + brute-force subdomain discovery              │
+├──────────────┼─────────┼────────────────────────────────────────────────────────┤
+│ FINGERPRINT  │  🔴 3   │ Web stack fingerprinting                               │
+├──────────────┴─────────┴────────────────────────────────────────────────────────┤
+│  9 modules  │  ⚪ L1: Recon  │  🟡 L2: Attack  │  🔴 L3: Deep                   │
+╰─────────────────────────────────────────────────────────────────────────────────╯
 
 ---
 
