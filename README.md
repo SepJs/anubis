@@ -164,7 +164,7 @@ anubis --gendoc
 │ PLATFORM     │ Linux / Windows / macOS │ Zero CGO dependencies                   │
 │              │ Fully static binaries                                             │
 ├──────────────┴───────────────────────────────────────────────────────────────────┤
-│              ⚡ Zero CGO │ 🌍 Cross-Platform │ 📦 Static                          │
+│                   Zero CGO  │  Cross-Platform   │  Static                        │
 ╰──────────────────────────────────────────────────────────────────────────────────╯
 ```
 
