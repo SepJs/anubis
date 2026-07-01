@@ -1,3 +1,6 @@
+// Package profile provides CPU, memory, and execution tracing profilers
+// using the Go runtime pprof and trace packages. Profiles are output as
+// standard Go .prof and .out files for analysis with go tool pprof.
 package profile
 
 import (

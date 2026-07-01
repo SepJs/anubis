@@ -1,3 +1,5 @@
+// Package throttle implements a token-bucket rate limiter using atomic CAS
+// operations for lock-free concurrent access and refill-on-read semantics.
 package throttle
 
 import (

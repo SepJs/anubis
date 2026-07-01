@@ -1,3 +1,7 @@
+// Package heuristic provides an AI-driven decision engine that evaluates
+// findings by likelihood, severity, and risk score using weighted rules
+// including evidence strength, confidence, CVSS correlation, OWASP
+// references, and historical pattern matching.
 package heuristic
 
 import (

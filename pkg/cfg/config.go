@@ -1,3 +1,6 @@
+// Package cfg handles YAML-based configuration loading, validation, and
+// template profiles for scan, evasion, proxy, database, API, and logging
+// settings.
 package cfg
 
 import (

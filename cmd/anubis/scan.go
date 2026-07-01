@@ -21,7 +21,6 @@ import (
 	"github.com/SepJs/anubis/pkg/scanner"
 	"github.com/SepJs/anubis/pkg/state"
 	"github.com/SepJs/anubis/pkg/utils"
-	"github.com/SepJs/anubis/pkg/version"
 	"github.com/SepJs/anubis/pkg/cfg"
 	"github.com/SepJs/anubis/pkg/db"
 	"github.com/SepJs/anubis/pkg/evasion"
@@ -53,7 +52,6 @@ func allModules() []scanner.Module {
 }
 
 func dispatchScan() error {
-	go backgroundUpdateCheck()
 
 	if profileMode {
 		profiler = profile.NewProfiler()
@@ -102,19 +100,6 @@ func dispatchScan() error {
 		return batchScan(scanCfg)
 	}
 	return runSingleScan(scanCfg)
-}
-
-func backgroundUpdateCheck() {
-	time.Sleep(500 * time.Millisecond)
-
-	release, err := version.FetchLatest()
-	if err != nil {
-		return
-	}
-	if version.IsNewer(release.TagName) {
-		fmt.Printf("\n  [!] Update available: %s → %s\n", version.Version, release.TagName)
-		fmt.Printf("      Run 'anubis --update' or visit %s\n\n", release.HTMLURL)
-	}
 }
 
 func buildConfig() scanner.ScanConfig {

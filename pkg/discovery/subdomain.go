@@ -1,3 +1,5 @@
+// Package discovery implements passive and brute-force subdomain discovery
+// using DNS lookups, certificate transparency logs, and common wordlists.
 package discovery
 
 import (

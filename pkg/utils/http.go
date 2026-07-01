@@ -1,3 +1,6 @@
+// Package utils provides shared HTTP client configuration, request helpers,
+// ANSI-coloured logging, input sanitisation, and interactive prompts used
+// throughout the Anubis scanner.
 package utils
 
 import (
@@ -10,6 +13,7 @@ import (
 	"time"
 )
 
+// HTTPConfig holds optional parameters for building an HTTP client.
 type HTTPConfig struct {
 	Timeout    time.Duration
 	ProxyURL   string
@@ -19,6 +23,7 @@ type HTTPConfig struct {
 	RateLimit  int
 }
 
+// DoRequestOptions groups optional parameters for the NewRequest helper.
 type DoRequestOptions struct {
 	Method   string
 	URL      string
@@ -28,6 +33,8 @@ type DoRequestOptions struct {
 	Cookies  []*http.Cookie
 }
 
+// DefaultHTTPConfig returns a sensible default HTTP configuration with a
+// 30-second timeout and a descriptive User-Agent.
 func DefaultHTTPConfig() HTTPConfig {
 	return HTTPConfig{
 		Timeout:   30 * time.Second,
@@ -36,6 +43,8 @@ func DefaultHTTPConfig() HTTPConfig {
 	}
 }
 
+// BuildHTTPClient constructs an http.Client from the given config, wiring
+// in proxy support, TLS settings, and redirect handling.
 func BuildHTTPClient(cfg HTTPConfig) (*http.Client, error) {
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{
@@ -68,6 +77,8 @@ func BuildHTTPClient(cfg HTTPConfig) (*http.Client, error) {
 	}, nil
 }
 
+// DoRequest creates and sends an HTTP request with the provided config,
+// applying an optional rate-limit sleep beforehand.
 func DoRequest(client *http.Client, method, targetURL string, body io.Reader, cfg HTTPConfig) (*http.Response, error) {
 	req, err := http.NewRequest(method, targetURL, body)
 	if err != nil {
@@ -86,6 +97,8 @@ func DoRequest(client *http.Client, method, targetURL string, body io.Reader, cf
 	return client.Do(req)
 }
 
+// NewRequest is a convenience wrapper that creates an HTTP request from
+// structured options without modifying a shared client.
 func NewRequest(opts DoRequestOptions) (*http.Response, error) {
 	req, err := http.NewRequest(opts.Method, opts.URL, opts.Body)
 	if err != nil {
@@ -109,6 +122,7 @@ func NewRequest(opts DoRequestOptions) (*http.Response, error) {
 	return client.Do(req)
 }
 
+// NormalizeTarget prepends http:// to a target string if no scheme is present.
 func NormalizeTarget(target string) string {
 	if !strings.HasPrefix(target, "http://") && !strings.HasPrefix(target, "https://") {
 		return "http://" + target
@@ -116,6 +130,7 @@ func NormalizeTarget(target string) string {
 	return target
 }
 
+// ExtractHost returns the hostname portion of a raw URL string.
 func ExtractHost(rawURL string) (string, error) {
 	u, err := url.Parse(rawURL)
 	if err != nil {
@@ -124,10 +139,12 @@ func ExtractHost(rawURL string) (string, error) {
 	return u.Hostname(), nil
 }
 
+// IsHTTPS returns true if the URL uses the https scheme.
 func IsHTTPS(rawURL string) bool {
 	return strings.HasPrefix(strings.ToLower(rawURL), "https://")
 }
 
+// SafeClose closes an io.ReadCloser, swallowing any error.
 func SafeClose(body io.ReadCloser) {
 	if body != nil {
 		_ = body.Close()

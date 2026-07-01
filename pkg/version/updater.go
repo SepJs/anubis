@@ -1,7 +1,11 @@
+// Package version provides version metadata, GitHub release checking,
+// automatic binary updates, and a 24-hour throttled background update
+// check that runs each time the application starts.
 package version
 
 import (
 	"crypto/sha256"
+	"encoding/json"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -14,8 +18,91 @@ import (
 	"time"
 )
 
-const downloadTimeout = 90 * time.Second
+const (
+	// downloadTimeout is the maximum time allowed for downloading a release asset.
+	downloadTimeout = 90 * time.Second
 
+	// updateStateDir is the subdirectory under the user's home directory where
+	// update state is persisted.
+	updateStateDir = ".anubis"
+
+	// updateStateFile is the file name for the JSON state that tracks when the
+	// last update check was performed.
+	updateStateFile = "update-state.json"
+
+	// updateCheckInterval is the minimum time that must elapse between
+	// automatic background update checks.
+	updateCheckInterval = 24 * time.Hour
+)
+
+// updateState stores the timestamp of the last background version check so
+// that the check only runs at most once every 24 hours.
+type updateState struct {
+	LastCheckUnix int64 `json:"last_check_unix"` // Unix timestamp (seconds)
+}
+
+// statePath returns the absolute path to the update-state.json file.
+func statePath() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", fmt.Errorf("update: resolve home dir: %w", err)
+	}
+	dir := filepath.Join(home, updateStateDir)
+	return filepath.Join(dir, updateStateFile), nil
+}
+
+// loadUpdateState reads the persisted update state from disk. If the file
+// does not exist or cannot be parsed, an empty state (epoch zero) is returned.
+func loadUpdateState() *updateState {
+	path, err := statePath()
+	if err != nil {
+		return &updateState{}
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return &updateState{}
+	}
+	var s updateState
+	if err := json.Unmarshal(data, &s); err != nil {
+		return &updateState{}
+	}
+	return &s
+}
+
+// saveUpdateState persists the update state to disk, creating the parent
+// directory if necessary.
+func saveUpdateState(s *updateState) error {
+	path, err := statePath()
+	if err != nil {
+		return err
+	}
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		return fmt.Errorf("update: mkdir: %w", err)
+	}
+	data, err := json.MarshalIndent(s, "", "  ")
+	if err != nil {
+		return fmt.Errorf("update: marshal state: %w", err)
+	}
+	return os.WriteFile(path, data, 0600)
+}
+
+// ShouldCheckUpdate returns true if at least 24 hours have elapsed since the
+// last successful background update check.
+func ShouldCheckUpdate() bool {
+	state := loadUpdateState()
+	last := time.Unix(state.LastCheckUnix, 0)
+	return time.Since(last) >= updateCheckInterval
+}
+
+// MarkUpdateChecked persists the current time as the last-check timestamp so
+// that subsequent calls to ShouldCheckUpdate return false until 24 hours pass.
+func MarkUpdateChecked() {
+	_ = saveUpdateState(&updateState{LastCheckUnix: time.Now().Unix()})
+}
+
+// SelectAsset picks the release asset whose name matches the current
+// operating system and architecture.
 func SelectAsset(release *ReleaseInfo) (*ReleaseAsset, error) {
 	if len(release.Assets) == 0 {
 		return nil, fmt.Errorf("update: release %s has no downloadable assets", release.TagName)
@@ -132,6 +219,29 @@ func RunAutoUpdate() error {
 	return nil
 }
 
+// BackgroundCheck performs a throttled background version check. It only
+// contacts the GitHub API once every 24 hours (tracked via
+// ~/.anubis/update-state.json). If a newer release is found, a concise
+// notification is printed to stderr so it does not interfere with structured
+// output (e.g. JSON reports). Call this as a goroutine at application start.
+func BackgroundCheck() {
+	if !ShouldCheckUpdate() {
+		return
+	}
+	MarkUpdateChecked()
+
+	release, err := FetchLatest()
+	if err != nil {
+		return // silently ignore transient errors on startup
+	}
+	if IsNewer(release.TagName) {
+		fmt.Fprintf(os.Stderr, "\n  [!] Update available: %s → %s\n", Version, release.TagName)
+		fmt.Fprintf(os.Stderr, "      Run 'anubis --update' or visit %s\n\n", release.HTMLURL)
+	}
+}
+
+// CurrentExecutablePath resolves the absolute path of the currently running
+// executable, following symlinks if necessary.
 func CurrentExecutablePath() (string, error) {
 	exe, err := os.Executable()
 	if err != nil {

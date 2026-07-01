@@ -1,3 +1,6 @@
+// Package baseline captures baseline metrics (response times, headers,
+// connection stability) against a target before scanning begins, enabling
+// comparison with future scans.
 package baseline
 
 import (

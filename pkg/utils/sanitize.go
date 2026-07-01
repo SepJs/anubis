@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// Compiled regular expressions used by the sanitisation helpers.
 var (
 	urlSchemeRe = regexp.MustCompile(`^(https?|ftp|smtp)://`)
 	hostRe      = regexp.MustCompile(`^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*$`)
@@ -14,6 +15,9 @@ var (
 	pathRe      = regexp.MustCompile(`^[a-zA-Z0-9_\-\.\/\~\%\@\!\$\&\'\(\)\*\+\,\;\=\:\?]*$`)
 )
 
+// SanitizeTarget validates and normalises a target URL, ensuring it has a
+// scheme and a valid hostname or IP address. Returns the cleansed URL or an
+// error describing the issue.
 func SanitizeTarget(input string) (string, error) {
 	input = strings.TrimSpace(input)
 	if input == "" {

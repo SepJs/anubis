@@ -1,3 +1,5 @@
+// Package dns performs DNS enumeration including subdomain brute-forcing,
+// MX/NS/TXT record lookups, and zone-transfer (AXFR) availability checks.
 package dns
 
 import (

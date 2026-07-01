@@ -1,3 +1,5 @@
+// Package scanner defines the core types, module interfaces, and the
+// worker-pool engine that orchestrates security scans.
 package scanner
 
 import (

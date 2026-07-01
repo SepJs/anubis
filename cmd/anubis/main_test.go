@@ -2,6 +2,8 @@ package main
 
 import (
 	"testing"
+
+	"github.com/SepJs/anubis/pkg/utils"
 )
 
 func TestSanitizeFilename(t *testing.T) {
@@ -22,6 +24,7 @@ func TestSanitizeFilename(t *testing.T) {
 }
 
 func TestNormalizeTarget(t *testing.T) {
+	// Verifies that utils.NormalizeTarget prepends http:// when no scheme is present.
 	tests := []struct {
 		input    string
 		expected string
@@ -30,10 +33,9 @@ func TestNormalizeTarget(t *testing.T) {
 		{"example.com", "http://example.com"},
 	}
 	for _, tt := range tests {
-		result := sanitizeFilename(tt.input)
+		result := utils.NormalizeTarget(tt.input)
 		if result != tt.expected {
-			// Just checking it doesn't panic
+			t.Errorf("NormalizeTarget(%q) = %q, want %q", tt.input, result, tt.expected)
 		}
 	}
-	_ = tests
 }

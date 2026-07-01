@@ -1,3 +1,6 @@
+// Package db provides an encrypted SQLite-backed scan history database
+// using AES-256-GCM encryption with PBKDF2 key derivation, zero CGO
+// (via modernc.org/sqlite).
 package db
 
 import (

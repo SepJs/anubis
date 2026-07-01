@@ -1,3 +1,6 @@
+// Package scanner implements the worker-pool scan engine with dynamic
+// context cancellation, panic recovery, modular dispatch, and concurrency
+// control via a bounded semaphore.
 package scanner
 
 import (

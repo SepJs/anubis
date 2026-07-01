@@ -1,3 +1,6 @@
+// Package delay provides configurable delay strategies (fixed, exponential,
+// linear, jitter, randomised, polymorphic) and an adaptive delay engine
+// that adjusts speed based on target response patterns.
 package delay
 
 import (

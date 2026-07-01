@@ -1,3 +1,5 @@
+// Package utils provides shared utilities including HTTP client helpers,
+// ANSI-coloured logging, input sanitisation, and interactive prompts.
 package utils
 
 import (

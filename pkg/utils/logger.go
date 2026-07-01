@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"os"
 	"time"
 )
 
@@ -107,10 +106,10 @@ func SeverityColor(severity string) string {
 	}
 }
 
+// anubisVersion is used by PrintBanner when the ldflag-injected
+// pkg/version.Version is not available (avoids import cycles).
+const anubisVersion = "2.0.0"
+
 func getVersion() string {
-	data, err := os.ReadFile("version.txt")
-	if err != nil {
-		return "dev"
-	}
-	return string(data)
+	return anubisVersion
 }

@@ -1,3 +1,6 @@
+// Package encoding provides payload obfuscation techniques for WAF bypass
+// including double URL encoding, nested Base64, Unicode escape, UTF-16,
+// mixed case, null-byte injection, and comment injection.
 package encoding
 
 import (

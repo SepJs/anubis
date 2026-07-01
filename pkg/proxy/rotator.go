@@ -1,3 +1,5 @@
+// Package proxy implements a SOCKS5/HTTP/HTTPS proxy rotator with health
+// checking, automatic failover, and round-robin distribution.
 package proxy
 
 import (

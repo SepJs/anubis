@@ -1,3 +1,6 @@
+// Package version manages version metadata, GitHub release checking,
+// semantic version comparison, SHA-256 checksum verification, and
+// automatic binary updates.
 package version
 
 import (
@@ -22,6 +25,7 @@ const (
 	httpTimeout = 8 * time.Second
 )
 
+// ReleaseInfo models a GitHub release as returned by the Latest Release API.
 type ReleaseInfo struct {
 	TagName     string         `json:"tag_name"`
 	Name        string         `json:"name"`
@@ -32,6 +36,7 @@ type ReleaseInfo struct {
 	Checksum    string         `json:"checksum,omitempty"`
 }
 
+// ReleaseAsset represents a single downloadable file attached to a release.
 type ReleaseAsset struct {
 	Name        string `json:"name"`
 	DownloadURL string `json:"browser_download_url"`
@@ -39,6 +44,7 @@ type ReleaseAsset struct {
 	Checksum    string `json:"checksum,omitempty"`
 }
 
+// Info returns a human-readable version string with build metadata.
 func Info() string {
 	return fmt.Sprintf("Anubis v%s (build %s, commit %s)", Version, BuildDate, GitHash)
 }

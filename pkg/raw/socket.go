@@ -1,3 +1,5 @@
+// Package raw provides raw socket operations (CAP_NET_RAW) for crafting
+// custom TCP packets, bypassing the OS TCP stack for stealth scanning.
 package raw
 
 import (

@@ -1,3 +1,6 @@
+// Package report generates security scan reports in JSON, HTML, and CSV
+// formats, computes CVSS 3.1 vectors, and prints terminal summaries with
+// risk assessments.
 package report
 
 import (

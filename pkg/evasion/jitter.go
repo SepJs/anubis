@@ -1,3 +1,6 @@
+// Package evasion implements traffic analysis countermeasures including
+// jitter-based delay patterns, browser header randomisation, packet padding,
+// fingerprint mimicry, and honeypot detection.
 package evasion
 
 import (

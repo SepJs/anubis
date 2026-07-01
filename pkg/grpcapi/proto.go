@@ -1,3 +1,6 @@
+// Package grpcapi provides a gRPC remote control interface for the Anubis
+// scan engine, allowing remote scan initiation, status queries, and module
+// listing over TLS with token authentication.
 package grpcapi
 
 type AnubisServiceServer struct {

@@ -1,3 +1,5 @@
+// Package brute_force tests for default credentials and weak authentication
+// by probing login endpoints with common username/password pairs.
 package brute_force
 
 import (

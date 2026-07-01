@@ -1,3 +1,6 @@
+// Package state manages scan checkpoint persistence for resume capability.
+// It uses a JSON state file (.anubis.state) with atomic.Pointer-based
+// lock-free concurrent access.
 package state
 
 import (

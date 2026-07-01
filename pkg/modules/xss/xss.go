@@ -1,3 +1,6 @@
+// Package xss detects reflected cross-site scripting (XSS) vulnerabilities
+// by injecting probe payloads into parameters and scanning responses for
+// unescaped reflection.
 package xss
 
 import (

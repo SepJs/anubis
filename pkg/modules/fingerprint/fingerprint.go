@@ -1,3 +1,6 @@
+// Package fingerprint identifies web server, operating system, CMS,
+// framework, and programming language by analysing HTTP headers, HTML
+// body content, and probing known CMS paths.
 package fingerprint
 
 import (

@@ -1,3 +1,6 @@
+// Package ssl analyses TLS/SSL certificates for expiry, weak keys,
+// deprecated protocols, weak cipher suites, hostname mismatches, and
+// forward secrecy.
 package ssl
 
 import (

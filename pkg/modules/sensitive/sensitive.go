@@ -1,3 +1,5 @@
+// Package sensitive probes for publicly accessible sensitive files,
+// configuration leaks, backup archives, and admin panel paths.
 package sensitive
 
 import (

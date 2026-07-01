@@ -1,9 +1,14 @@
+// Package main is the entry point for the Anubis security scanner. It
+// registers the panic recovery handler, triggers the 24-hour-throttled
+// background update check, and dispatches to the Cobra CLI command tree.
 package main
 
 import (
 	"fmt"
 	"os"
 	"runtime/debug"
+
+	"github.com/SepJs/anubis/pkg/version"
 )
 
 func main() {
@@ -17,6 +22,10 @@ func main() {
 			os.Exit(1)
 		}
 	}()
+
+	// Start the 24-hour-throttled background update check on every startup.
+	// This runs in a separate goroutine and will not block startup or scanning.
+	go version.BackgroundCheck()
 
 	Execute()
 }

@@ -1,3 +1,5 @@
+// Package sqli detects SQL injection vulnerabilities by sending error-based
+// payloads and scanning responses for database error signatures.
 package sqli
 
 import (
