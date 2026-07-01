@@ -17,22 +17,21 @@
 
 ## Features
 
-╔══════════════════╤══════════════════════════════════════════════════════════════════════════════════════════╗
-║     Category     │                         Capabilities                                                     ║
-╠══════════════════╪══════════════════════════════════════════════════════════════════════════════════════════╣
-║ Engine           │ Worker-pool concurrency, atomic state, context cancellation, zero memory leaks           ║
-║ Evasion          │ Polymorphic jitter, randomized delays, packet padding, DPI bypass                        ║
-║ Proxy            │ SOCKS5/HTTP/HTTPS rotation, health checking, automatic failover                          ║
-║ Stealth          │ Ghost mode, browser fingerprint spoofing, cURL/Wget mimicry                              ║
-║ Adaptive         │ AI-driven latency analysis, trend-based speed adjustment, anti-rate-limit                ║
-║ Scanner          │ 9 modules + subdomain discovery, CVSS scoring, heuristic likelihood analysis             ║
-║ Reporting        │ HTML (risk meter, CVSS vectors), JSON, CSV + encrypted SQLite history                    ║
-║ API              │ gRPC remote control with TLS + token auth                                                ║
-║ WAF Bypass       │ Double URL encoding, nested Base64, Unicode escape, comment injection                    ║
-║ Anti-Sandbox     │ Honeypot detection, sandbox environment identification                                   ║
-║ Security         │ Input sanitization, panic recovery → crash.log, stripped+PIE binary                      ║
-║ Platform         │ Linux/Windows/macOS, zero CGO dependencies, fully static binaries                        ║
-╚══════════════════╧══════════════════════════════════════════════════════════════════════════════════════════╝
+| Category         | Capabilities                                                                   |
+| ---------------- | ------------------------------------------------------------------------------ |
+| **Engine**       | Worker-pool concurrency, atomic state, context cancellation, zero memory leaks |
+| **Evasion**      | Polymorphic jitter, randomized delays, packet padding, DPI bypass              |
+| **Proxy**        | SOCKS5 / HTTP / HTTPS rotation, health checking, automatic failover            |
+| **Stealth**      | Ghost mode, browser fingerprint spoofing, cURL / Wget mimicry                  |
+| **Adaptive**     | AI-driven latency analysis, trend-based speed adjustment, anti-rate-limit      |
+| **Scanner**      | 9 modules + subdomain discovery, CVSS scoring, heuristic likelihood analysis   |
+| **Reporting**    | HTML (risk meter, CVSS vectors), JSON, CSV + encrypted SQLite history          |
+| **API**          | gRPC remote control with TLS + token authentication                            |
+| **WAF Bypass**   | Double URL encoding, nested Base64, Unicode escape, comment injection          |
+| **Anti-Sandbox** | Honeypot detection, sandbox environment identification                         |
+| **Security**     | Input sanitization, panic recovery → crash.log, stripped + PIE binary          |
+| **Platform**     | Linux / Windows / macOS, zero CGO dependencies, fully static binaries          |
+
 
 
 ---
@@ -127,11 +126,11 @@ anubis --gendoc
 ## Architecture
 
 
-## 🏗️ Architecture
+##  Architecture
 
 ```text
 ╭──────────────────────────────────────────────────────────────────────────────────╮
-│                              🔥  ANUBIS  🔥                                      │
+│                                    ANUBIS                                        │
 ├──────────────┬───────────────────────────────────────────────────────────────────┤
 │ ENGINE       │ Worker-pool concurrency │ Atomic state │ Context cancellation     │
 │              │ Zero memory leaks                                                 │
@@ -176,15 +175,15 @@ anubis --gendoc
 ## Modules
 
 
-## 🔍 Scan Modules
+## Scan Modules
 
 ---------------------------------------------------------------------------
 | Module              | Level | Description                               |
 | ------------------- | ----- | ----------------------------------------- |
-| **PORT_SCAN**       | ⚪ L1  | TCP port scanning with service detection |
-| **SSL_CHECK**       | ⚪ L1  | TLS/SSL certificate analysis             |
-| **HEADERS**         | ⚪ L1  | HTTP security headers audit              |
-| **SENSITIVE_FILES** | ⚪ L1  | Sensitive file and directory discovery   |
+| **PORT_SCAN**       | ⚪ L1 | TCP port scanning with service detection  |
+| **SSL_CHECK**       | ⚪ L1 | TLS/SSL certificate analysis              |
+| **HEADERS**         | ⚪ L1 | HTTP security headers audit               |
+| **SENSITIVE_FILES** | ⚪ L1 | Sensitive file and directory discovery    |
 | **DNS**             | 🟡 L2 | DNS enumeration and subdomain discovery   |
 | **SQLI**            | 🟡 L2 | SQL injection detection                   |
 | **XSS**             | 🟡 L2 | Cross-site scripting detection            |
@@ -194,7 +193,7 @@ anubis --gendoc
 ---------------------------------------------------------------------------
 ---
 
-### 📊 Levels Overview
+### Levels Overview
 
 * ⚪ **L1 – Recon**: Basic reconnaissance and passive analysis
 * 🟡 **L2 – Attack**: Active vulnerability testing
