@@ -123,9 +123,6 @@ anubis --gendoc
 
 ---
 
-## Architecture
-
-
 ##  Architecture
 
 ```text
@@ -168,12 +165,7 @@ anubis --gendoc
 ╰──────────────────────────────────────────────────────────────────────────────────╯
 ```
 
-
-
 ---
-
-## Modules
-
 
 ## Scan Modules
 
