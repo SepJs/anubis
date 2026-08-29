@@ -51,6 +51,9 @@ func allModules() []scanner.Module {
 		xss.New(),
 		bruteforce.New(),
 		fingerprint.New(),
+		lfimod.New(),
+		sstimod.New(),
+		openredirect.New(),
 	}
 }
 
