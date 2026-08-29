@@ -26,6 +26,9 @@ import (
 	"github.com/SepJs/anubis/pkg/evasion"
 	"github.com/SepJs/anubis/pkg/heuristic"
 	"github.com/SepJs/anubis/pkg/profile"
+	lfimod "github.com/SepJs/anubis/pkg/modules/lfi"
+	openredirect "github.com/SepJs/anubis/pkg/modules/openredirect"
+	sstimod "github.com/SepJs/anubis/pkg/modules/ssti"
 )
 
 const reportsDir = "reports"
