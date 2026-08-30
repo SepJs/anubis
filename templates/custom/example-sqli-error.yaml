@@ -1,0 +1,22 @@
+id: custom-mysql-error
+name: "Custom MySQL Error Probe"
+description: "Triggers and detects a MySQL error message in a target parameter"
+severity: high
+level: 2
+endpoint: ""
+method: GET
+placeholder: "{{payload}}"
+payloads:
+  file: ""            # optional external file; or use inline list:
+  list:
+    - "'"
+    - "' OR '1'='1"
+params:
+  q: "{{payload}}"    # param name + payload placeholder
+condition: and
+matchers:
+  - type: contains
+    value: "you have an error in your sql syntax"
+cvss: 8.6
+owasp: "A03:2021 – Injection"
+remediation: "Use parameterized queries."
