@@ -29,7 +29,7 @@ import (
 	lfimod "github.com/SepJs/anubis/pkg/modules/lfi"
 	openredirect "github.com/SepJs/anubis/pkg/modules/openredirect"
 	sstimod "github.com/SepJs/anubis/pkg/modules/ssti"
-	templatengine "github.com/SepJs/anubis/pkg/template"
+	templatengine "github.com/SepJs/anubis/templates"
 )
 
 const reportsDir = "reports"
