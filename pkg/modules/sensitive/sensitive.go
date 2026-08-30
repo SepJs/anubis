@@ -98,6 +98,25 @@ func (m *Module) Run(cfg scanner.ScanConfig, findings chan<- scanner.Finding) er
 
 	baseURL := strings.TrimRight(utils.NormalizeTarget(cfg.Target), "/")
 
+	// Optional external wordlist (--wordlist / cfg.Wordlist). When set, it
+	// REPLACES the built-in path list so pentesters can plug in SecLists etc.
+	paths := filePaths
+	if cfg.Wordlist != "" {
+		custom := utils.LoadWordlist(cfg.Wordlist, nil)
+		if len(custom) > 0 {
+			paths = make([]sensitiveFile, len(custom))
+			for i, p := range custom {
+				paths[i] = sensitiveFile{
+					path:        p,
+					description: fmt.Sprintf("Custom wordlist path %s accessible", p),
+					severity:    scanner.SeverityLow, // unknown targets → low severity
+					remediation: "Review whether this path should be publicly accessible.",
+					level:       scanner.Level1,
+				}
+			}
+		}
+	}
+
 	// Respect robots.txt if configured
 	disallowed := map[string]bool{}
 	if cfg.RespectLimits {
@@ -106,7 +125,7 @@ func (m *Module) Run(cfg scanner.ScanConfig, findings chan<- scanner.Finding) er
 
 	// Filter paths for current level
 	var eligible []sensitiveFile
-	for _, f := range filePaths {
+	for _, f := range paths {
 		if f.level <= cfg.Level {
 			eligible = append(eligible, f)
 		}
