@@ -67,6 +67,33 @@ func (m *Module) Run(cfg scanner.ScanConfig, findings chan<- scanner.Finding) er
 
 	// Subdomain enumeration
 	subdomains := buildSubdomainList(cfg.Level)
+
+	// Certificate Transparency discovery (requires --external-api).
+	// Best-effort: any failure is logged and skipped silently.
+	if cfg.ExternalAPI {
+		domain := extractRegistrableDomain(cfg.Target)
+		if domain != "" {
+			ctSubs, err := utils.CertTransparencySubdomains(domain)
+			if err != nil {
+				utils.LogDebug(cfg.Verbose, "dns: CT log query failed: %v", err)
+			} else {
+				existing := map[string]bool{}
+				for _, s := range subdomains {
+					existing[s] = true
+				}
+				added := 0
+				for _, s := range ctSubs {
+					if !existing[s] {
+						existing[s] = true
+						subdomains = append(subdomains, s)
+						added++
+					}
+				}
+				utils.LogInfo("dns: +%d subdomain(s) from Certificate Transparency logs", added)
+			}
+		}
+	}
+
 	utils.LogDebug(cfg.Verbose, "dns: probing %d subdomains", len(subdomains))
 
 	sem := make(chan struct{}, cfg.Threads)
