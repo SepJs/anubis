@@ -71,6 +71,14 @@ var (
 	configFile     string
 	profileMode    bool
 	autoDoc        bool
+
+	// Crawler
+	crawl          bool
+	crawlDepth     int
+	crawlMaxPages  int
+
+	// Custom YAML templates
+	templatesDir string
 )
 
 var rootCmd = &cobra.Command{
@@ -158,6 +166,11 @@ func init() {
 	rootCmd.Flags().StringVarP(&configFile, "config", "c", "", "Path to YAML configuration file")
 	rootCmd.Flags().BoolVar(&profileMode, "profile", false, "Enable performance profiling (CPU/mem/trace)")
 	rootCmd.Flags().BoolVar(&autoDoc, "gendoc", false, "Generate documentation and exit")
+
+	rootCmd.Flags().BoolVar(&crawl, "crawl", false, "Crawl the target first and feed discovered endpoints to injection modules")
+	rootCmd.Flags().IntVar(&crawlDepth, "crawl-depth", 2, "Crawler max depth (requires --crawl)")
+	rootCmd.Flags().IntVar(&crawlMaxPages, "crawl-max-pages", 30, "Crawler max pages (requires --crawl)")
+	rootCmd.Flags().StringVar(&templatesDir, "templates", "", "Directory of YAML custom-check templates (e.g. templates/custom)")
 }
 
 func runScan(cmd *cobra.Command, args []string) error {
