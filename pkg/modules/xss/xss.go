@@ -1,6 +1,6 @@
 // Package xss detects reflected cross-site scripting (XSS) vulnerabilities
-// by injecting probe payloads into parameters and scanning responses for
-// unescaped reflection.
+// by injecting uniquely-marked probes and verifying unescaped reflection
+// with context classification.
 package xss
 
 import (
@@ -21,11 +21,9 @@ type Module struct{}
 func New() *Module { return &Module{} }
 
 func (m *Module) Name() string             { return "XSS" }
-func (m *Module) Description() string      { return "Cross-Site Scripting (Reflected/Stored) detection" }
+func (m *Module) Description() string      { return "Cross-Site Scripting (Reflected) detection with context analysis" }
 func (m *Module) Level() scanner.ScanLevel { return scanner.Level2 }
 
-// reflectedPayloads are XSS probes that help detect reflection without being harmful
-// Using unique markers that we look for in the response
 var reflectedPayloads = []struct {
 	payload string
 	marker  string
@@ -37,22 +35,13 @@ var reflectedPayloads = []struct {
 	{`<ScRiPt>anubisXSSProbe</ScRiPt>`, `anubisxssprobe`},
 	{`javascript:anubisProbe`, `javascript:anubisprobe`},
 	{`<img src=x onerror=anubisProbe>`, `onerror=anubisprobe`},
-}
-
-// contextIndicators help classify where the reflection occurs
-var contextIndicators = map[string]string{
-	"attribute": "Reflected inside an HTML attribute — high XSS risk",
-	"script":    "Reflected inside a <script> block — critical XSS risk",
-	"html":      "Reflected in HTML body context",
-	"url":       "Reflected in URL/href context",
+	{`<svg onload=anubisProbe>`, `onerror=anubisprobe`},
 }
 
 func (m *Module) Run(cfg scanner.ScanConfig, findings chan<- scanner.Finding) error {
 	httpCfg := utils.DefaultHTTPConfig()
 	httpCfg.UserAgent = cfg.UserAgent
 	httpCfg.Timeout = time.Duration(cfg.Timeout) * time.Second
-	// Pacing handled by the shared delay.Limiter below, not by DoRequest's
-	// own sleep — see the equivalent note in pkg/modules/sensitive/sensitive.go.
 	httpCfg.RateLimit = 0
 
 	if cfg.SSLBypass {
@@ -65,39 +54,31 @@ func (m *Module) Run(cfg scanner.ScanConfig, findings chan<- scanner.Finding) er
 	}
 
 	target := utils.NormalizeTarget(cfg.Target)
-	params := extractURLParams(target)
+	targets := utils.EndpointList(cfg, target)
 
-	if len(params) == 0 {
-		params = []string{"q", "search", "query", "s", "term", "keyword", "name", "message", "comment", "text"}
-		utils.LogDebug(cfg.Verbose, "xss: no URL params found, testing common parameter names")
-	}
-
-	utils.LogDebug(cfg.Verbose, "xss: testing %d parameter(s) with %d payloads", len(params), len(reflectedPayloads))
-
-	// Sequential loop (no goroutines) — a single Limiter with no mutex is safe.
 	limiter := delay.FromConfig(cfg.RateLimit, cfg.DelayStrategy, cfg.MaxDelayMs)
 
-	for _, param := range params {
-		for _, p := range reflectedPayloads {
-			if err := testReflection(client, target, param, p.payload, p.marker, httpCfg, cfg, findings, m.Name(), limiter); err != nil {
-				utils.LogDebug(cfg.Verbose, "xss: error testing param %s: %v", param, err)
+	for _, tgt := range targets {
+		params := extractURLParams(tgt)
+		if len(params) == 0 {
+			if tgt != target {
+				continue
 			}
+			params = []string{"q", "search", "query", "name", "comment", "message", "page", "redirect", "email"}
 		}
-	}
 
-	// Also test common search/input endpoints
-	commonEndpoints := []string{"/search", "/comment", "/feedback", "/contact"}
-	for _, ep := range commonEndpoints {
-		u, err := url.Parse(target)
-		if err != nil {
-			continue
-		}
-		u.Path = strings.TrimRight(u.Path, "/") + ep
-		u.RawQuery = ""
-		testURL := u.String()
-		for _, p := range reflectedPayloads[:2] { // limit endpoint fuzzing
-			if err := testFormReflection(client, testURL, p.payload, p.marker, httpCfg, cfg, findings, m.Name(), limiter); err != nil {
-				utils.LogDebug(cfg.Verbose, "xss: error testing endpoint %s: %v", testURL, err)
+		for _, param := range params {
+			for _, pp := range reflectedPayloads {
+				statusCode, found := testParam(client, tgt, param, pp.payload, pp.marker, httpCfg, cfg, findings, m.Name())
+				if cfg.AdaptiveDelay && statusCode > 0 {
+					limiter.RecordStatusCode(statusCode)
+				}
+				if cfg.RateLimit > 0 {
+					limiter.Wait()
+				}
+				if found {
+					break
+				}
 			}
 		}
 	}
@@ -105,151 +86,83 @@ func (m *Module) Run(cfg scanner.ScanConfig, findings chan<- scanner.Finding) er
 	return nil
 }
 
-// testReflection probes one parameter with one payload, paces via limiter
-// afterward, and feeds the observed status code back in when adaptive
-// delay is enabled.
-func testReflection(
+func testParam(
 	client *http.Client,
 	targetURL, param, payload, marker string,
 	httpCfg utils.HTTPConfig,
 	cfg scanner.ScanConfig,
 	findings chan<- scanner.Finding,
 	module string,
-	limiter *delay.Limiter,
-) error {
+) (int, bool) {
 	u, err := url.Parse(targetURL)
 	if err != nil {
-		return err
+		return 0, false
 	}
-
 	q := u.Query()
 	q.Set(param, payload)
 	u.RawQuery = q.Encode()
-	testURL := u.String()
 
-	resp, err := utils.DoRequest(client, http.MethodGet, testURL, nil, httpCfg)
+	resp, err := utils.DoRequest(client, http.MethodGet, u.String(), nil, httpCfg)
 	if err != nil {
-		if cfg.RateLimit > 0 {
-			limiter.Wait()
-		}
-		return nil
+		return 0, false
 	}
 	defer utils.SafeClose(resp.Body)
-
-	if cfg.AdaptiveDelay {
-		limiter.RecordStatusCode(resp.StatusCode)
-	}
-	if cfg.RateLimit > 0 {
-		limiter.Wait()
-	}
+	statusCode := resp.StatusCode
 
 	body, err := io.ReadAll(io.LimitReader(resp.Body, 128*1024))
 	if err != nil {
-		return nil
+		return statusCode, false
 	}
 
 	bodyStr := string(body)
 	bodyLower := strings.ToLower(bodyStr)
 	markerLower := strings.ToLower(marker)
 
-	if strings.Contains(bodyLower, markerLower) {
-		context := detectReflectionContext(bodyLower, markerLower)
-		severity := scanner.SeverityHigh
-		if context == "script" {
-			severity = scanner.SeverityCritical
-		}
-
-		// Check if it appears to be encoded (lower confidence if so)
-		confidence := scanner.ConfidenceConfirmed
-		if isEncoded(bodyStr, payload) {
-			confidence = scanner.ConfidenceSuspected
-		}
-
-		findings <- scanner.Finding{
-			ID:           fmt.Sprintf("xss-reflected-%s", param),
-			Module:       module,
-			Type:         scanner.FindingVulnerability,
-			Title:        fmt.Sprintf("Reflected XSS: parameter %q", param),
-			Description:  fmt.Sprintf("Parameter %q reflects user input without encoding in the response. %s. Payload was reflected in: %s context.", param, contextIndicators[context], context),
-			Severity:     severity,
-			Confidence:   confidence,
-			Endpoint:     targetURL,
-			Parameter:    param,
-			Method:       "GET",
-			Evidence:     fmt.Sprintf("Payload %q found reflected in response body (context: %s)", payload, context),
-			CVSSScore:    7.4,
-			OWASPMapping: "A03:2021 – Injection",
-			Remediation:  buildRemediation(param),
-			VulnCode:     buildVulnCode(param),
-			SecureCode:   buildSecureCode(param),
-			References: []string{
-				"https://owasp.org/www-community/attacks/xss/",
-				"https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
-			},
-			DiscoveredAt: time.Now(),
-		}
+	// KEY CHECK: the raw (unescaped) marker must be present, and the raw
+	// payload must NOT be present only in escaped form. If only the
+	// URL-encoded payload appears, output encoding is in place → no finding.
+	if !strings.Contains(bodyLower, markerLower) {
+		return statusCode, false
+	}
+	if isEncoded(bodyStr, payload) {
+		return statusCode, false
 	}
 
-	return nil
+	context := detectReflectionContext(bodyLower, markerLower)
+	severity := scanner.SeverityHigh
+	if context == "script" {
+		severity = scanner.SeverityCritical
+	}
+
+	findings <- scanner.Finding{
+		ID:           fmt.Sprintf("xss-reflected-%s", param),
+		Module:       module,
+		Type:         scanner.FindingVulnerability,
+		Title:        fmt.Sprintf("Reflected XSS: parameter %q (%s context)", param, context),
+		Description:  fmt.Sprintf("Parameter %q reflects user input unescaped in the response (context: %s). Verify exploitability in a browser; scripted payloads in this context may execute.", param, context),
+		Severity:     severity,
+		Confidence:   scanner.ConfidenceConfirmed,
+		Endpoint:     targetURL,
+		Parameter:    param,
+		Method:       "GET",
+		Evidence:     fmt.Sprintf("Payload %q found unescaped in response body (context: %s)", payload, context),
+		CVSSScore:    7.4,
+		OWASPMapping: "A03:2021 – Injection",
+		Remediation:  buildRemediation(param),
+		VulnCode:     buildVulnCode(param),
+		SecureCode:   buildSecureCode(param),
+		References: []string{
+			"https://owasp.org/www-community/attacks/xss/",
+			"https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+		},
+		DiscoveredAt: time.Now(),
+	}
+	return statusCode, true
 }
 
-func testFormReflection(
-	client *http.Client,
-	targetURL, payload, marker string,
-	httpCfg utils.HTTPConfig,
-	cfg scanner.ScanConfig,
-	findings chan<- scanner.Finding,
-	module string,
-	limiter *delay.Limiter,
-) error {
-	// Test via GET with common param names
-	testParams := []string{"q", "search", "query"}
-	for _, p := range testParams {
-		u, _ := url.Parse(targetURL)
-		q := u.Query()
-		q.Set(p, payload)
-		u.RawQuery = q.Encode()
-
-		resp, err := utils.DoRequest(client, http.MethodGet, u.String(), nil, httpCfg)
-		if err != nil {
-			if cfg.RateLimit > 0 {
-				limiter.Wait()
-			}
-			continue
-		}
-
-		if cfg.AdaptiveDelay {
-			limiter.RecordStatusCode(resp.StatusCode)
-		}
-		if cfg.RateLimit > 0 {
-			limiter.Wait()
-		}
-
-		body, _ := io.ReadAll(io.LimitReader(resp.Body, 64*1024))
-		utils.SafeClose(resp.Body)
-		if strings.Contains(strings.ToLower(string(body)), strings.ToLower(marker)) {
-			findings <- scanner.Finding{
-				ID:           fmt.Sprintf("xss-reflected-endpoint-%s-%s", strings.ReplaceAll(targetURL, "/", "-"), p),
-				Module:       module,
-				Type:         scanner.FindingVulnerability,
-				Title:        fmt.Sprintf("Reflected XSS at endpoint: %s (param: %s)", targetURL, p),
-				Description:  fmt.Sprintf("XSS reflection detected at %s via parameter %q", targetURL, p),
-				Severity:     scanner.SeverityHigh,
-				Confidence:   scanner.ConfidenceSuspected,
-				Endpoint:     targetURL,
-				Parameter:    p,
-				Method:       "GET",
-				Evidence:     fmt.Sprintf("Payload reflected: %s", payload),
-				CVSSScore:    7.4,
-				OWASPMapping: "A03:2021 – Injection",
-				Remediation:  buildRemediation(p),
-				VulnCode:     buildVulnCode(p),
-				SecureCode:   buildSecureCode(p),
-				DiscoveredAt: time.Now(),
-			}
-		}
-	}
-	return nil
+func isEncoded(body, payload string) bool {
+	encoded := url.QueryEscape(payload)
+	return strings.Contains(body, encoded) && !strings.Contains(body, payload)
 }
 
 func detectReflectionContext(body, marker string) string {
@@ -257,7 +170,6 @@ func detectReflectionContext(body, marker string) string {
 	if idx < 0 {
 		return "html"
 	}
-	// Look at surrounding context
 	start := idx - 200
 	if start < 0 {
 		start = 0
@@ -270,18 +182,12 @@ func detectReflectionContext(body, marker string) string {
 	if strings.Contains(surrounding, "href=") || strings.Contains(surrounding, "src=") || strings.Contains(surrounding, "action=") {
 		return "url"
 	}
-	// Count unclosed quotes — attribute context
 	singleQuotes := strings.Count(surrounding, "'") % 2
 	doubleQuotes := strings.Count(surrounding, "\"") % 2
 	if singleQuotes != 0 || doubleQuotes != 0 {
 		return "attribute"
 	}
 	return "html"
-}
-
-func isEncoded(body, payload string) bool {
-	encoded := url.QueryEscape(payload)
-	return strings.Contains(body, encoded) && !strings.Contains(body, payload)
 }
 
 func extractURLParams(rawURL string) []string {
