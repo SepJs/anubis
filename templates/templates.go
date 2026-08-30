@@ -1,7 +1,7 @@
-// Package template implements a YAML-based custom check engine, similar in
-// spirit to Nuclei templates: users define checks (id, matchers, payloads)
-// in YAML files and Anubis executes them against targets without any Go code.
-package template
+// Package template implements a YAML-based custom check engine, in the
+// spirit of Nuclei templates: users define checks (id, request, matchers,
+// payloads) in YAML files and Anubis executes them without any Go changes.
+package templates
 
 import (
 	"fmt"
@@ -12,95 +12,102 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// MatchType defines how matchers compare against the response.
+// MatchType defines how a matcher compares against the response.
 type MatchType string
 
 const (
-	MatchContains  MatchType = "contains"  // substring match (case-insensitive)
-	MatchRegex     MatchType = "regex"     // regex match on body
-	MatchStatus    MatchType = "status"    // HTTP status code(s), comma-separated
-	MatchHeader    MatchType = "header"    // header contains value (name:value)
-	MatchWordCount MatchType = "words"     // word-count range, e.g. "120-180"
+	MatchContains MatchType = "contains" // substring match (case-insensitive by default)
+	MatchRegex    MatchType = "regex"    // regexp match on body
+	MatchStatus   MatchType = "status"   // HTTP status code(s), comma-separated
+	MatchHeader   MatchType = "header"   // named header contains value
+	MatchWordCount MatchType = "words"   // body word count within "min-max" range
 )
 
-// Condition when multiple matchers are present.
+// Condition combines multiple matchers.
 type Condition string
 
 const (
-	ConditionAND Condition = "and"
-	ConditionOR  Condition = "or"
+	ConditionAnd Condition = "and"
+	ConditionOr  Condition = "or"
 )
 
 // Matcher is a single response predicate.
 type Matcher struct {
-	Type   MatchType `yaml:"type"`
-	Value  string    `yaml:"value"`
-	Header string    `yaml:"header,omitempty"` // for type: header
-	Part   string    `yaml:"part,omitempty"`   // body (default) or header
-	CaseSensitive bool `yaml:"case_sensitive,omitempty"`
+	Type          MatchType `yaml:"type"`
+	Value         string    `yaml:"value"`
+	Header        string    `yaml:"header,omitempty"`
+	CaseSensitive bool      `yaml:"case_sensitive,omitempty"`
 }
 
-// Payload can be a fixed list or an external file.
+// Payloads is either an inline list or an external file (one payload per line).
 type Payloads struct {
-	File string    `yaml:"file,omitempty"` // path to wordlist-style payload file
-	List []string  `yaml:"list,omitempty"` // inline payloads
+	File string   `yaml:"file,omitempty"`
+	List []string `yaml:"list,omitempty"`
 }
 
-// Template is a single custom check.
+// Template is a single YAML-defined custom check.
 type Template struct {
-	ID          string    `yaml:"id"`
-	Name        string    `yaml:"name"`
-	Description string    `yaml:"description,omitempty"`
-	Severity    string    `yaml:"severity"` // critical|high|medium|low|info
-	Level       int       `yaml:"level"`    // min scan level (default 2)
-	Reference   string    `yaml:"reference,omitempty"`
-	Endpoint    string    `yaml:"endpoint"`            // path appended to target, e.g. /api/login
-	Method      string    `yaml:"method"`              // GET/POST (default GET)
-	Params      map[string]string `yaml:"params"`      // fixed query/body params
-	Body        string    `yaml:"body,omitempty"`      // static POST body ({{payload}} placeholder)
-	Placeholder string    `yaml:"placeholder"`         // default "{{payload}}"
-	Payloads    Payloads  `yaml:"payloads"`
-	Matchers    []Matcher `yaml:"matchers"`
-	Condition   Condition `yaml:"condition"`           // and (default) | or
-	CVSS        float64   `yaml:"cvss,omitempty"`
-	OWASP       string    `yaml:"owasp,omitempty"`
-	Remediation string    `yaml:"remediation,omitempty"`
+	ID          string            `yaml:"id"`
+	Name        string            `yaml:"name"`
+	Description string            `yaml:"description"`
+	Severity    string            `yaml:"severity"`
+	Level       int               `yaml:"level,omitempty"`
+	Endpoint    string            `yaml:"endpoint,omitempty"`
+	Method      string            `yaml:"method,omitempty"`
+	Params      map[string]string `yaml:"params,omitempty"`
+	Body        string            `yaml:"body,omitempty"`
+	Placeholder string            `yaml:"placeholder,omitempty"`
+	Payloads    Payloads          `yaml:"payloads,omitempty"`
+	Matchers    []Matcher         `yaml:"matchers"`
+	Condition   Condition         `yaml:"condition,omitempty"`
+	CVSS        float64           `yaml:"cvss,omitempty"`
+	OWASP       string            `yaml:"owasp,omitempty"`
+	Remediation string            `yaml:"remediation,omitempty"`
+	Reference   string            `yaml:"reference,omitempty"`
 }
 
-// Validate checks a template for structural correctness.
+// Validate checks structural correctness.
 func (t *Template) Validate() error {
-	if t.ID == "" {
+	if strings.TrimSpace(t.ID) == "" {
 		return fmt.Errorf("template: id is required")
 	}
 	if t.Endpoint == "" && t.Body == "" {
-		return fmt.Errorf("template %s: endpoint is required for request-based checks", t.ID)
+		return fmt.Errorf("template %q: endpoint is required", t.ID)
 	}
 	if len(t.Matchers) == 0 {
-		return fmt.Errorf("template %s: at least one matcher is required", t.ID)
+		return fmt.Errorf("template %q: at least one matcher is required", t.ID)
 	}
 	for i, m := range t.Matchers {
 		switch m.Type {
-		case MatchContains, MatchStatus, MatchRegex, MatchWordCount:
-			if m.Value == "" && m.Type != MatchWordCount {
-				return fmt.Errorf("template %s: matcher %d (type %s) requires value", t.ID, i, m.Type)
+		case MatchContains, MatchRegex:
+			if m.Value == "" {
+				return fmt.Errorf("template %q: matcher %d (type %s) requires value", t.ID, i, m.Type)
 			}
-			if m.Type == MatchWordCount {
-				if _, ok := parseRange(m.Value); !ok {
-					return fmt.Errorf("template %s: matcher %d: invalid words range %q (want \"min-max\")", t.ID, i, m.Value)
+			if m.Type == MatchRegex {
+				if _, err := regexpCompile(m.Value); err != nil {
+					return fmt.Errorf("template %q: matcher %d: invalid regex: %w", t.ID, i, err)
 				}
+			}
+		case MatchStatus:
+			if strings.TrimSpace(m.Value) == "" {
+				return fmt.Errorf("template %q: matcher %d: status requires value", t.ID, i)
 			}
 		case MatchHeader:
 			if m.Header == "" || m.Value == "" {
-				return fmt.Errorf("template %s: matcher %d: header matchers require header and value", t.ID, i)
+				return fmt.Errorf("template %q: matcher %d: header matchers require header and value", t.ID, i)
+			}
+		case MatchWordCount:
+			if _, _, ok := parseRange(m.Value); !ok {
+				return fmt.Errorf("template %q: matcher %d: invalid words range %q (want \"min-max\")", t.ID, i, m.Value)
 			}
 		default:
-			return fmt.Errorf("template %s: matcher %d: unknown type %q", t.ID, i, m.Type)
+			return fmt.Errorf("template %q: matcher %d: unknown type %q", t.ID, i, m.Type)
 		}
 	}
 	return nil
 }
 
-// LoadFile parses a single YAML template file.
+// LoadFile parses and validates a single YAML template file.
 func LoadFile(path string) (*Template, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -116,14 +123,13 @@ func LoadFile(path string) (*Template, error) {
 	return &t, nil
 }
 
-// LoadDir loads every *.yml / *.yaml file in a directory (non-recursive).
-// Returns templates plus a list of per-file errors (not fatal).
+// LoadDir loads every *.yml / *.yaml file in dir. Per-file errors are
+// returned separately and are non-fatal — a bad template never aborts a scan.
 func LoadDir(dir string) ([]*Template, []error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, []error{fmt.Errorf("template: read dir %s: %w", dir, err)}
 	}
-
 	var out []*Template
 	var errs []error
 	for _, e := range entries {
@@ -145,15 +151,13 @@ func LoadDir(dir string) ([]*Template, []error) {
 }
 
 func parseRange(s string) (int, int, bool) {
-	parts := strings.SplitN(s, "-", 2)
+	parts := strings.SplitN(strings.TrimSpace(s), "-", 2)
 	if len(parts) != 2 {
 		return 0, 0, false
 	}
-	var lo, hi int
-	if _, err := fmt.Sscanf(parts[0], "%d", &lo); err != nil {
-		return 0, 0, false
-	}
-	if _, err := fmt.Sscanf(parts[1], "%d", &hi); err != nil {
+	lo, err1 := strconvAtoi(parts[0])
+	hi, err2 := strconvAtoi(parts[1])
+	if err1 != nil || err2 != nil || lo < 0 || hi < lo {
 		return 0, 0, false
 	}
 	return lo, hi, true
