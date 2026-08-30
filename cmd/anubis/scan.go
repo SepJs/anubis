@@ -224,6 +224,27 @@ func runSingleScan(cfg scanner.ScanConfig) error {
 		}
 	}
 
+// Custom YAML templates (--templates DIR) — appended to main findings.
+	if templatesDir != "" {
+		te, terr := templatengine.NewEngine(templatesDir)
+		if terr != nil {
+			utils.LogWarn("template: load error: %v", terr)
+		} else if te.Count() > 0 {
+			utils.LogInfo("Templates: running %d custom check(s)...", te.Count())
+			tch := make(chan scanner.Finding, 64)
+			go func() {
+				defer close(tch)
+				if rerr := te.Run(cfg, tch); rerr != nil {
+					utils.LogWarn("template: run error: %v", rerr)
+				}
+			}()
+			for f := range tch {
+				result.AllFindings = append(result.AllFindings, f)
+			}
+			utils.LogSuccess("Templates: custom checks complete")
+		}
+	}
+	
 	if historyDB != nil {
 		if _, err := historyDB.SaveScan(result); err != nil {
 			utils.LogWarn("Failed to save scan history: %v", err)
