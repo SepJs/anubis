@@ -303,3 +303,41 @@ func min(a, b int) int {
 	}
 	return b
 }
+
+// extractRegistrableDomain reduces a URL or host to its registrable domain
+// (best-effort, no public-suffix dependency): strips scheme and path, and
+// keeps the last two labels. Good enough for common cases (example.com,
+// sub.example.co.uk misses — acceptable heuristic).
+func extractRegistrableDomain(target string) string {
+	s := target
+	if i := strings.Index(s, "://"); i != -1 {
+		s = s[i+3:]
+	}
+	if i := strings.Index(s, "/"); i != -1 {
+		s = s[:i]
+	}
+	if i := strings.Index(s, ":"); i != -1 {
+		s = s[:i]
+	}
+	s = strings.TrimSuffix(strings.ToLower(s), ".")
+	// naive registrable-domain heuristic
+	labels := strings.Split(s, ".")
+	if len(labels) <= 1 {
+		return ""
+	}
+	// handle common two-part TLDs
+	twoPartTLDs := map[string]bool{
+		"co.uk": true, "org.uk": true, "ac.uk": true, "gov.uk": true,
+		"com.au": true, "co.nz": true, "co.jp": true, "co.kr": true,
+		"com.br": true, "co.za": true, "com.mx": true, "com.tr": true,
+		"co.in": true, "com.eg": true, "com.sa": true, "com.pk": true,
+		"co.id": true, "com.ph": true, "com.vn": true, "co.il": true,
+	}
+	if len(labels) >= 3 {
+		last2 := labels[len(labels)-2] + "." + labels[len(labels)-1]
+		if twoPartTLDs[last2] {
+			return labels[len(labels)-3] + "." + last2
+		}
+	}
+	return labels[len(labels)-2] + "." + labels[len(labels)-1]
+}
