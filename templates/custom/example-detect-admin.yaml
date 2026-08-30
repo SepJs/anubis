@@ -1,0 +1,15 @@
+id: admin-panel-detect
+name: "Admin Panel Detection"
+description: "Detects common admin panel paths returning HTTP 200 with login form markers"
+severity: low
+level: 1
+endpoint: /admin
+method: GET
+condition: and
+matchers:
+  - type: status
+    value: "200"
+  - type: contains
+    value: "admin"
+    part: body
+remediation: "Restrict /admin to authenticated users or internal network."
