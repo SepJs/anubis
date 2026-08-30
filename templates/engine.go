@@ -310,3 +310,19 @@ func emitFinding(t *Template, reqURL, payload string) {
 		DiscoveredAt: time.Now(),
 	}
 }
+
+func regexpCompile(s string) (*regexp.Regexp, error) { return regexp.Compile(s) }
+func osStat(path string) (os.FileInfo, error)        { return os.Stat(path) }
+func strconvAtoi(s string) (int, error)              { return strconv.Atoi(s) }
+func methodOf(t *Template) string {
+	if t.Method == "" {
+		return "GET"
+	}
+	return strings.ToUpper(t.Method)
+}
+func refs(t *Template) []string {
+	if t.Reference == "" {
+		return nil
+	}
+	return []string{t.Reference}
+}
