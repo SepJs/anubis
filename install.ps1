@@ -1,144 +1,108 @@
-<#
-.SYNOPSIS
-    Anubis Security Scanner — Windows PowerShell Installer
-.DESCRIPTION
-    Downloads and installs the latest Anubis release for Windows.
-    Supports automatic PATH installation and verification.
-.PARAMETER Version
-    Specific version to install (default: latest)
-.PARAMETER InstallDir
-    Installation directory (default: $HOME\anubis)
-.PARAMETER AddToPath
-    Add Anubis to system PATH (default: true)
-.PARAMETER Force
-    Overwrite existing installation without prompting
-.EXAMPLE
-    .\install.ps1
-    .\install.ps1 -Version v2.0.0
-    .\install.ps1 -InstallDir C:\tools\anubis -AddToPath $true
-#>
+# ═══════════════════════════════════════════════════════
+#  Anubis installer — Windows (PowerShell)
+#  Usage:  iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/SepJs/anubis/main/install.ps1'))
+# ═══════════════════════════════════════════════════════
+$ErrorActionPreference = "Stop"
 
-param(
-    [string]$Version = "latest",
-    [string]$InstallDir = "$HOME\anubis",
-    [bool]$AddToPath = $true,
-    [switch]$Force
-)
+$Repo = "SepJs/anubis"
 
-$RepoUrl = "https://api.github.com/repos/SepJs/anubis/releases/latest"
-$DownloadBase = "https://github.com/SepJs/anubis/releases/download"
+function Write-Info($msg)  { Write-Host "[*] $msg" -ForegroundColor Cyan }
+function Write-Ok($msg)    { Write-Host "[OK] $msg" -ForegroundColor Green }
+function Write-Warn2($msg) { Write-Host "[!] $msg" -ForegroundColor Yellow }
+function Die($msg)         { Write-Host "[X] $msg" -ForegroundColor Red; exit 1 }
 
-Write-Host "╔══════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "║       Anubis Security Scanner           ║" -ForegroundColor Cyan
-Write-Host "║         Windows Installation            ║" -ForegroundColor Cyan
-Write-Host "╚══════════════════════════════════════════╝" -ForegroundColor Cyan
-Write-Host ""
+$Arch = switch ($env:PROCESSOR_ARCHITECTURE) {
+    "AMD64" { "amd64" }
+    "ARM64" { "arm64" }
+    "x86"   { "386"   }
+    default { Die "Unsupported architecture: $env:PROCESSOR_ARCHITECTURE" }
+}
 
-# Detect architecture
-$Arch = if ([Environment]::Is64BitOperatingSystem) { "amd64" } else { "386" }
-$BinaryName = "anubis-windows-$Arch.exe"
+Write-Info "Detected: windows/$Arch"
 
-# Determine version
-if ($Version -eq "latest") {
-    Write-Host "[*] Fetching latest release info..." -ForegroundColor Yellow
+$InstallDir = Join-Path $env:LOCALAPPDATA "Programs\anubis"
+New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
+
+function Try-ReleaseInstall {
     try {
-        $Release = Invoke-RestMethod -Uri $RepoUrl -UserAgent "anubis-installer"
-        $Version = $Release.tag_name
-        $Asset = $Release.assets | Where-Object { $_.name -eq $BinaryName }
-        if (-not $Asset) {
-            Write-Error "[-] No asset found for $BinaryName in release $Version"
-            exit 1
+        Write-Info "Fetching latest release info..."
+        $headers = @{ "User-Agent" = "anubis-installer" }
+        $rel = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repo/releases/latest" -Headers $headers -TimeoutSec 30
+        $tag = $rel.tag_name
+        Write-Info "Latest release: $tag"
+
+        $assetName = "anubis_${tag.TrimStart('v')}_windows_${Arch}.zip"
+        $asset = $rel.assets | Where-Object { $_.name -eq $assetName } | Select-Object -First 1
+        if (-not $asset) {
+            Write-Warn2 "Asset $assetName not found in release $tag"
+            return $false
         }
-        $DownloadUrl = $Asset.browser_download_url
-        $ChecksumUrl = $DownloadUrl + ".sha256"
+
+        $zipPath = Join-Path $env:TEMP $assetName
+        Write-Info "Downloading $($asset.browser_download_url)..."
+        Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $zipPath -TimeoutSec 120
+
+        Write-Info "Extracting..."
+        Expand-Archive -Path $zipPath -DestinationPath $InstallDir -Force
+        Remove-Item $zipPath -Force -ErrorAction SilentlyContinue
+        return $true
     } catch {
-        Write-Error "[-] Failed to fetch release info: $_"
-        exit 1
+        Write-Warn2 "Release install failed: $_"
+        return $false
     }
+}
+
+function Try-SourceInstall {
+    if (-not (Get-Command go -ErrorAction SilentlyContinue)) {
+        Write-Warn2 "Go not found"
+        return $false
+    }
+    Write-Info "Building from source..."
+    try {
+        $tmp = Join-Path $env:TEMP "anubis-build-$(Get-Random)"
+        git clone --depth 1 "https://github.com/$Repo.git" $tmp 2>$null
+        if (-not (Test-Path "$tmp\cmd")) { return $false }
+
+        Push-Location $tmp
+        $env:CGO_ENABLED = "0"
+        go build -trimpath -ldflags "-s -w" -o "$InstallDir\anubis.exe" .\cmd\anubis
+        Pop-Location
+        Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
+        return (Test-Path "$InstallDir\anubis.exe")
+    } catch {
+        Write-Warn2 "Source install failed: $_"
+        return $false
+    }
+}
+
+function Add-ToUserPath($dir) {
+    $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+    if ($userPath -notlike "*$dir*") {
+        [Environment]::SetEnvironmentVariable("Path", "$userPath;$dir", "User")
+        $env:Path = "$env:Path;$dir"
+        Write-Ok "Added $dir to user PATH"
+    }
+}
+
+$installed = $false
+if (Try-ReleaseInstall) {
+    Write-Ok "Installed from GitHub release"
+    $installed = $true
+} elseif (Try-SourceInstall) {
+    Write-Ok "Built and installed from source"
+    $installed = $true
 } else {
-    $DownloadUrl = "$DownloadBase/$Version/$BinaryName"
-    $ChecksumUrl = "$DownloadBase/$Version/$BinaryName.sha256"
+    Die "Could not install Anubis — install Go from https://golang.org/dl and retry"
 }
 
-Write-Host "[*] Version: $Version" -ForegroundColor Green
-Write-Host "[*] Architecture: $Arch" -ForegroundColor Green
-Write-Host "[*] Binary: $BinaryName" -ForegroundColor Green
+Add-ToUserPath $InstallDir
 
-# Create install directory
-if (-not (Test-Path $InstallDir)) {
-    New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
-    Write-Host "[+] Created directory: $InstallDir" -ForegroundColor Green
+$exe = Join-Path $InstallDir "anubis.exe"
+if (Test-Path $exe) {
+    Write-Ok "anubis.exe ready at $exe"
+    Write-Host ""
+    Write-Host "  Open a NEW terminal and try:" -ForegroundColor Cyan
+    Write-Host "    anubis -t https://example.com -l 1" -ForegroundColor Yellow
+} else {
+    Die "anubis.exe not found after install"
 }
-
-$OutputPath = Join-Path $InstallDir "anubis.exe"
-
-# Download binary
-Write-Host "[*] Downloading $BinaryName ..." -ForegroundColor Yellow
-try {
-    Invoke-WebRequest -Uri $DownloadUrl -OutFile $OutputPath -UserAgent "anubis-installer"
-    Write-Host "[+] Downloaded to: $OutputPath" -ForegroundColor Green
-} catch {
-    Write-Error "[-] Download failed: $_"
-    exit 1
-}
-
-# Verify checksum
-Write-Host "[*] Verifying checksum..." -ForegroundColor Yellow
-try {
-    $ChecksumContent = Invoke-RestMethod -Uri $ChecksumUrl -UserAgent "anubis-installer"
-    $ExpectedHash = $ChecksumContent.Split(' ')[0]
-    $ActualHash = (Get-FileHash -Path $OutputPath -Algorithm SHA256).Hash.ToLower()
-    if ($ActualHash -eq $ExpectedHash) {
-        Write-Host "[+] Checksum verified: $ExpectedHash" -ForegroundColor Green
-    } else {
-        Write-Warning "[-] Checksum mismatch!"
-        Write-Warning "    Expected: $ExpectedHash"
-        Write-Warning "    Actual:   $ActualHash"
-        if (-not $Force) {
-            $confirm = Read-Host "[?] Continue with installation anyway? (y/N)"
-            if ($confirm -ne 'y') { exit 1 }
-        }
-    }
-} catch {
-    Write-Warning "[-] Checksum verification skipped: $_"
-}
-
-# Set execution bit (Windows equivalent — just mark as executable, though it's always executable)
-Write-Host "[+] Binary installed at: $OutputPath" -ForegroundColor Green
-
-# Add to PATH
-if ($AddToPath) {
-    $CurrentPath = [Environment]::GetEnvironmentVariable("PATH", "User")
-    if ($CurrentPath -notlike "*$InstallDir*") {
-        $NewPath = "$CurrentPath;$InstallDir"
-        [Environment]::SetEnvironmentVariable("PATH", $NewPath, "User")
-        Write-Host "[+] Added $InstallDir to user PATH" -ForegroundColor Green
-        Write-Host "[!] Restart your terminal for PATH changes to take effect" -ForegroundColor Yellow
-    } else {
-        Write-Host "[*] $InstallDir already in PATH" -ForegroundColor Cyan
-    }
-}
-
-# Test installation
-Write-Host ""
-Write-Host "[*] Testing installation..." -ForegroundColor Yellow
-try {
-    $VersionOutput = & "$OutputPath" --version 2>&1
-    Write-Host "[+] $VersionOutput" -ForegroundColor Green
-} catch {
-    Write-Warning "[-] Could not verify installation: $_"
-}
-
-Write-Host ""
-Write-Host "╔══════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "║        Installation Complete!            ║" -ForegroundColor Cyan
-Write-Host "╚══════════════════════════════════════════╝" -ForegroundColor Cyan
-Write-Host ""
-Write-Host "Usage:"
-Write-Host "  anubis -t https://example.com -l 1"
-Write-Host "  anubis -t https://example.com -l 2 --ghost"
-Write-Host ""
-Write-Host "Documentation: https://github.com/SepJs/anubis" -ForegroundColor Cyan
-Write-Host ""
-Write-Host "IMPORTANT: Authorized use only." -ForegroundColor Yellow
-Write-Host "Scanning systems without permission is illegal." -ForegroundColor Yellow
