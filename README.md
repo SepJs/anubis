@@ -1,7 +1,5 @@
 # Anubis v2.5.2
 
-> Elite modular security scanner — AI-driven heuristics, polymorphic evasion, zero-CGO architecture.
-
 ```
   █████╗ ███╗   ██╗██╗   ██╗██████╗ ██╗███████╗
  ██╔══██╗████╗  ██║██║   ██║██╔══██╗██║██╔════╝
