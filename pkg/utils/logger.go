@@ -6,16 +6,16 @@ import (
 )
 
 const (
-	ansiReset  = "\033[0m"
-	ansiRed    = "\033[31m"
-	ansiGreen  = "\033[32m"
-	ansiYellow = "\033[33m"
-	ansiBlue   = "\033[34m"
-	ansiCyan   = "\033[36m"
-	ansiWhite  = "\033[37m"
-	ansiBold   = "\033[1m"
-	ansiDim    = "\033[2m"
-	ansiUL     = "\033[4m"
+	ansiReset   = "\033[0m"
+	ansiRed     = "\033[31m"
+	ansiGreen   = "\033[32m"
+	ansiYellow  = "\033[33m"
+	ansiBlue    = "\033[34m"
+	ansiCyan    = "\033[36m"
+	ansiWhite   = "\033[37m"
+	ansiBold    = "\033[1m"
+	ansiDim     = "\033[2m"
+	ansiUL      = "\033[4m"
 	ansiHiWhite = "\033[97m"
 )
 
@@ -72,20 +72,23 @@ func PrintBanner() {
  ███████║██╔██╗ ██║██║   ██║██████╔╝██║███████╗
  ██╔══██║██║╚██╗██║██║   ██║██╔══██╗██║╚════██║
  ██║  ██║██║ ╚████║╚██████╔╝██████╔╝██║███████║
- ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚═════╝ ╚═╝╚══════╝
-`
+ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚═════╝ ╚═╝╚══════╝`
 	fmt.Print(ansiRed + ansiBold + banner + ansiReset)
-	fmt.Println(ansiDim + "  Security Scanner — Authorized Use Only" + ansiReset)
-	fmt.Printf("%s  v%s | Vladimir Unknown | github.com/SepJs/anubis%s\n\n", ansiDim, getVersion(), ansiReset)
+	fmt.Println()
+	fmt.Println(ansiDim + "  ────────────────────────────────────────────────────────────" + ansiReset)
+	fmt.Printf("%s  Author  : vladimir_unknown%s\n", ansiHiWhite+ansiBold, ansiReset)
+	fmt.Printf("%s  Project : github.com/SepJs/anubis%s\n", ansiDim, ansiReset)
+	fmt.Printf("%s  Version : v%s%s\n", ansiDim, anubisVersion, ansiReset)
+	fmt.Println(ansiDim + "  ────────────────────────────────────────────────────────────" + ansiReset)
+	fmt.Println()
 }
 
 func PrintDisclaimer() {
-	fmt.Println(ansiYellow + ansiBold + "[!] DISCLAIMER: This tool is designed for authorized security testing only." + ansiReset)
-	fmt.Println(ansiYellow + ansiBold + "[!] Unauthorized use against systems you do not own or have explicit" + ansiReset)
-	fmt.Println(ansiYellow + ansiBold + "[!] permission to test is illegal and unethical." + ansiReset)
-	fmt.Println(ansiYellow + ansiBold + "[!] The author assumes no liability for misuse or damage caused by this tool." + ansiReset)
-	fmt.Println(ansiYellow + ansiBold + "[!] Use this tool only for legitimate and ethical purposes." + ansiReset)
-	fmt.Println(ansiYellow + ansiBold + "[!] Compliance with applicable laws and regulations is the user's responsibility." + ansiReset)
+	fmt.Println(ansiYellow + ansiBold + "[!] DISCLAIMER:" + ansiReset)
+	fmt.Println(ansiYellow + "    This tool is for EDUCATIONAL purposes only." + ansiReset)
+	fmt.Println(ansiYellow + "    If anything goes wrong, it is on you — the author" + ansiReset)
+	fmt.Println(ansiYellow + "    assumes no responsibility for any damage or misuse." + ansiReset)
+	fmt.Println(ansiYellow + "    Use only against systems you own or have permission to test." + ansiReset)
 	fmt.Println()
 }
 
@@ -108,8 +111,4 @@ func SeverityColor(severity string) string {
 
 // anubisVersion is used by PrintBanner when the ldflag-injected
 // pkg/version.Version is not available (avoids import cycles).
-const anubisVersion = "2.0.0"
-
-func getVersion() string {
-	return anubisVersion
-}
+const anubisVersion = "2.5.2"
