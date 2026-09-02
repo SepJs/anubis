@@ -1,0 +1,18 @@
+# Build artifacts
+/anubis
+anubis.exe
+dist/
+
+# Runtime artifacts
+crash.log
+*.log
+anubis.db
+*.db-journal
+output/
+
+# Local config / secrets
+templates/custom/local-*.yaml
+
+# Go
+*.test
+coverage.out
