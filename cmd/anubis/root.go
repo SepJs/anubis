@@ -84,24 +84,39 @@ var (
 var rootCmd = &cobra.Command{
 	Use:   "anubis [flags] -t TARGET",
 	Short: "Anubis — Elite Security Scanner",
-	Long: `
-Anubis v2.0 — Advanced modular security scanner with AI-driven heuristics,
-polymorphic evasion, zero-dependency architecture, and enterprise-grade reporting.
+	Long: `Anubis v2.5 — Advanced modular web security scanner.
 
 Scan levels:
-  1 — Passive reconnaissance (stealth, 5-min limit)
-  2 — Active scanning (standard)
-  3 — Deep scan (aggressive, comprehensive)
+  -l 1   Passive reconnaissance (stealth, minimal footprint)
+  -l 2   Active scanning (standard)
+  -l 3   Deep scan (aggressive, comprehensive)
 
-Example usage:
+Modules:
+  sqli, xss, lfi, ssti, openredirect, sensitive,
+  dns, ssl, headers, fingerprint, portscan, brute_force
+  (select with --modules / --disabled-modules)
+
+Extras:
+  --crawl        discover endpoints before scanning
+  --templates    run custom YAML check templates
+  --ghost        stealth mode
+  --batch        scan a target list from a file
+
+Run 'anubis -h' to see every flag with its description.`,
+	Example: `  # Passive / stealth scan (level 1)
   anubis -t https://example.com -l 1
+
+  # Active scan with stealth features (level 2)
   anubis -t https://example.com -l 2 --ghost --strategy polymorphic
-  anubis -t https://example.com -l 3 --threads 20 --deep-scan
-  anubis -t https://example.com --proxy socks5://127.0.0.1:9050
-  anubis -c config.yaml -t https://example.com
-  anubis --resume
-  anubis --batch --batch-file targets.txt -l 1
-`,
+
+  # Deep scan with crawler and custom YAML templates (level 3)
+  anubis -t https://example.com -l 3 --crawl --crawl-depth 3 --templates templates/custom
+
+  # Batch mode over a target list
+  anubis --batch --batch-file targets.txt -l 2
+
+  # Full example: authenticated scan through a proxy
+  anubis -t https://example.com -l 2 --ghost -u admin -p s3cret --proxy socks5://127.0.0.1:9050`,
 	Args: cobra.NoArgs,
 	RunE: runScan,
 }
@@ -192,13 +207,14 @@ func runScan(cmd *cobra.Command, args []string) error {
 
 	utils.PrintBanner()
 	utils.PrintDisclaimer()
+	
+	if target == "" && !resume && !batch {
+		// sqlmap-style: bare `anubis` shows the banner + disclaimer + help
+		return cmd.Help()
+	}
 
 	if level < 1 || level > 3 {
 		return fmt.Errorf("scan level must be 1, 2, or 3 (got %d)", level)
-	}
-
-	if target == "" && !resume && !batch {
-		return fmt.Errorf("target is required: use -t https://example.com")
 	}
 
 	if batch && batchFile == "" {
