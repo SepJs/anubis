@@ -507,39 +507,119 @@ func sortBySeverity(findings []scanner.Finding) {
 }
 
 func PrintTerminalSummary(result *scanner.ScanResult) {
-	utils.PrintSeparator()
-	utils.PrintHeader("Scan Complete — Summary")
-	utils.PrintSeparator()
-
-	fmt.Printf("  Target:    %s\n", result.Target)
-	fmt.Printf("  Level:     %d\n", result.ScanLevel)
-	fmt.Printf("  Duration:  %s\n", result.Duration.Round(time.Second))
-	fmt.Printf("  Risk:      %.1f/10\n", result.Summary.RiskScore)
-	fmt.Printf("  Modules:   %d run, %d completed, %d failed\n\n",
-		result.Summary.ModulesRun,
-		result.Summary.ModulesCompleted,
-		result.Summary.ModulesFailed,
-	)
-
-	utils.PrintHeader("Findings by Severity")
-	severities := []scanner.Severity{
-		scanner.SeverityCritical,
-		scanner.SeverityHigh,
-		scanner.SeverityMedium,
-		scanner.SeverityLow,
-		scanner.SeverityInfo,
+	if utils.SilentMode {
+		return
 	}
-	for _, sev := range severities {
-		count := result.Summary.BySeverity[string(sev)]
+
+	border := "\033[2m──────────────────────────────────────────────────────────────────────\033[0m"
+	bold := "\033[1m"
+	reset := "\033[0m"
+	dim := "\033[2m"
+	cyan := "\033[36m"
+	hiWhite := "\033[97m"
+
+	fmt.Println()
+	fmt.Println(border)
+	fmt.Printf("  %s%sANUBIS AUDIT REPORT SUMMARY%s\n", bold, hiWhite, reset)
+	fmt.Println(border)
+
+	// Target overview
+	fmt.Printf("  %sTarget URL  :%s %s%s%s\n", dim, reset, bold, result.Target, reset)
+	fmt.Printf("  %sScan Level  :%s Level %d\n", dim, reset, result.ScanLevel)
+	fmt.Printf("  %sScan Time   :%s %s %s(Duration: %s)%s\n",
+		dim, reset, result.StartTime.Format("2006-01-02 15:04:05"),
+		dim, result.Duration.Round(time.Millisecond), reset)
+	fmt.Printf("  %sModules     :%s %d executed (%d passed, %d failed)\n",
+		dim, reset, result.Summary.ModulesRun, result.Summary.ModulesCompleted, result.Summary.ModulesFailed)
+
+	// Risk gauge
+	score := result.Summary.RiskScore
+	if score > 10 {
+		score = 10
+	}
+	filled := int(math.Round(score * 2)) // 20 blocks
+	if filled > 20 {
+		filled = 20
+	}
+	bar := strings.Repeat("█", filled) + strings.Repeat("░", 20-filled)
+
+	var riskColor, riskLabel string
+	switch {
+	case score >= 9.0:
+		riskColor = "\033[41;97;1m"
+		riskLabel = "CRITICAL RISK"
+	case score >= 7.0:
+		riskColor = "\033[31;1m"
+		riskLabel = "HIGH RISK"
+	case score >= 4.0:
+		riskColor = "\033[33;1m"
+		riskLabel = "MEDIUM RISK"
+	case score > 0.0:
+		riskColor = "\033[32;1m"
+		riskLabel = "LOW RISK"
+	default:
+		riskColor = "\033[36;1m"
+		riskLabel = "MINIMAL RISK"
+	}
+
+	fmt.Printf("  %sRisk Rating :%s %s[%s]%s %s%.1f/10 (%s)%s\n",
+		dim, reset, riskColor, bar, reset, riskColor, score, riskLabel, reset)
+
+	fmt.Println()
+	fmt.Println("  " + bold + "Severity Breakdown:" + reset)
+	severities := []struct {
+		sev  scanner.Severity
+		name string
+	}{
+		{scanner.SeverityCritical, "CRITICAL"},
+		{scanner.SeverityHigh, "HIGH"},
+		{scanner.SeverityMedium, "MEDIUM"},
+		{scanner.SeverityLow, "LOW"},
+		{scanner.SeverityInfo, "INFO"},
+	}
+
+	for _, s := range severities {
+		count := result.Summary.BySeverity[string(s.sev)]
+		badge := utils.SeverityBadge(s.name)
 		if count > 0 {
-			fmt.Printf("  %s  %d\n", utils.SeverityColor(string(sev)), count)
+			fmt.Printf("    %s  %s%d finding(s)%s\n", badge, bold, count, reset)
+		} else {
+			fmt.Printf("    %s  %s0%s\n", badge, dim, reset)
 		}
 	}
 
-	total := result.Summary.TotalFindings
-	fmt.Printf("\n  Total: %d finding(s)\n", total)
-	if result.Summary.CVSSAverage > 0 {
-		fmt.Printf("  Avg CVSS: %.1f\n", result.Summary.CVSSAverage)
+	// List findings
+	if len(result.AllFindings) > 0 {
+		fmt.Println()
+		fmt.Printf("  %s%sDiscovered Vulnerabilities (%d total):%s\n", bold, cyan, len(result.AllFindings), reset)
+		sorted := make([]scanner.Finding, len(result.AllFindings))
+		copy(sorted, result.AllFindings)
+		sortBySeverity(sorted)
+
+		for i, f := range sorted {
+			badge := utils.SeverityBadge(string(f.Severity))
+			cvss := ""
+			if f.CVSSScore > 0 {
+				cvss = fmt.Sprintf(" %s(CVSS %.1f)%s", dim, f.CVSSScore, reset)
+			}
+			param := ""
+			if f.Parameter != "" {
+				param = fmt.Sprintf(" %s[%s]%s", cyan, f.Parameter, reset)
+			}
+			fmt.Printf("   %2d. %s %s%s%s%s%s\n",
+				i+1, badge, bold, f.Title, reset, cvss, param)
+			if f.Endpoint != "" {
+				fmt.Printf("       %s↳ URL :%s %s\n", dim, reset, f.Endpoint)
+			}
+			if f.Evidence != "" && len(f.Evidence) < 120 {
+				fmt.Printf("       %s↳ Evid:%s %s\n", dim, reset, f.Evidence)
+			}
+		}
+	} else {
+		fmt.Println()
+		fmt.Printf("  \033[32;1m[✓] No vulnerabilities detected during this scan.\033[0m\n")
 	}
-	utils.PrintSeparator()
+
+	fmt.Println(border)
+	fmt.Println()
 }

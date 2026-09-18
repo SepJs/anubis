@@ -1,0 +1,8 @@
+{
+  "name": "Anubis Security Scanner",
+  "description": "Enterprise-grade CLI security scanner and vulnerability audit engine with an interactive Linux Web Terminal.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

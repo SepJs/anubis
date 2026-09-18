@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -8,6 +9,7 @@ import (
 	"time"
 
 	"github.com/SepJs/anubis/pkg/baseline"
+	"github.com/SepJs/anubis/pkg/discovery"
 	bruteforce "github.com/SepJs/anubis/pkg/modules/brute_force"
 	"github.com/SepJs/anubis/pkg/modules/dns"
 	"github.com/SepJs/anubis/pkg/modules/fingerprint"
@@ -203,6 +205,29 @@ func runSingleScan(cfg scanner.ScanConfig) error {
 		}
 	}
 
+	if crawl {
+		ccfg := discovery.CrawlerConfig{
+			Target:        cfg.Target,
+			MaxDepth:      crawlDepth,
+			MaxPages:      crawlMaxPages,
+			Timeout:       time.Duration(cfg.Timeout) * time.Second,
+			UserAgent:     cfg.UserAgent,
+			SSLBypass:     cfg.SSLBypass,
+			ProxyURL:      cfg.ProxyURL,
+			RespectLimits: cfg.RespectLimits,
+			Verbose:       cfg.Verbose,
+		}
+		c, err := discovery.NewCrawler(ccfg)
+		if err != nil {
+			utils.LogWarn("Crawler init error: %v", err)
+		} else {
+			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+			discovered := c.Crawl(ctx)
+			cancel()
+			cfg.Endpoints = append(cfg.Endpoints, discovered...)
+		}
+	}
+
 	printPreScanInfo(cfg)
 
 	engine := scanner.NewEngine(cfg, allModules())
@@ -358,26 +383,45 @@ func collectBaseline(cfg scanner.ScanConfig) (*baseline.Metrics, error) {
 }
 
 func printPreScanInfo(cfg scanner.ScanConfig) {
-	utils.PrintSeparator()
-	utils.LogInfo("Target:    %s", cfg.Target)
-	utils.LogInfo("Level:     %d", cfg.Level)
-	utils.LogInfo("Threads:   %d", cfg.Threads)
-	utils.LogInfo("Timeout:   %ds", cfg.Timeout)
-	utils.LogInfo("Rate:      %dms (%s strategy)", cfg.RateLimit, cfg.DelayStrategy)
+	if utils.SilentMode {
+		return
+	}
+	dim := "\033[2m"
+	bold := "\033[1m"
+	reset := "\033[0m"
+	cyan := "\033[36m"
+	hiWhite := "\033[97m"
+
+	fmt.Println()
+	fmt.Printf("  %s┌── SCAN PROFILE & TARGET CONFIGURATION ──────────────────────────┐%s\n", dim, reset)
+	fmt.Printf("  %s│%s  %sTarget   :%s %s%-51s%s%s│%s\n", dim, reset, cyan+bold, reset, bold+hiWhite, cfg.Target, reset, dim, reset)
+
+	lvlDesc := "Level 1 (Passive Reconnaissance & Headers)"
+	if cfg.Level == 2 {
+		lvlDesc = "Level 2 (Active Vulnerability & Injection Audit)"
+	} else if cfg.Level == 3 {
+		lvlDesc = "Level 3 (Aggressive Exhaustive Deep Scan)"
+	}
+	fmt.Printf("  %s│%s  %sProfile  :%s %-51s%s│%s\n", dim, reset, cyan+bold, reset, lvlDesc, dim, reset)
+	fmt.Printf("  %s│%s  %sEngine   :%s %d Workers | Timeout: %ds | Rate: %dms%-18s%s│%s\n",
+		dim, reset, cyan+bold, reset, cfg.Threads, cfg.Timeout, cfg.RateLimit, "", dim, reset)
+
+	stealth := fmt.Sprintf("%s strategy", cfg.DelayStrategy)
 	if cfg.GhostMode {
-		utils.LogInfo("Ghost:     enabled")
+		stealth = fmt.Sprintf("Ghost Mode (Polymorphic Anti-WAF, %s)", cfg.DelayStrategy)
 	}
-	utils.LogInfo("Reports:   %s/", reportsDir)
+	fmt.Printf("  %s│%s  %sEvasion  :%s %-51s%s│%s\n", dim, reset, cyan+bold, reset, stealth, dim, reset)
+
+	if len(cfg.Endpoints) > 0 {
+		fmt.Printf("  %s│%s  %sEndpoints:%s %-51s%s│%s\n", dim, reset, cyan+bold, reset,
+			fmt.Sprintf("%d target URIs mapped for audit", len(cfg.Endpoints)), dim, reset)
+	}
 	if cfg.ProxyURL != "" {
-		utils.LogInfo("Proxy:     %s", cfg.ProxyURL)
+		fmt.Printf("  %s│%s  %sProxy    :%s %-51s%s│%s\n", dim, reset, cyan+bold, reset, cfg.ProxyURL, dim, reset)
 	}
-	if cfg.SSLBypass {
-		utils.LogWarn("SSL bypass enabled")
-	}
-	if cfg.AdaptiveDelay {
-		utils.LogInfo("Adaptive delay: enabled")
-	}
-	utils.PrintSeparator()
+	fmt.Printf("  %s│%s  %sOutput   :%s %-51s%s│%s\n", dim, reset, cyan+bold, reset,
+		fmt.Sprintf("%s (%s)", cfg.OutputFile, cfg.OutputFormat), dim, reset)
+	fmt.Printf("  %s└──────────────────────────────────────────────────────────────────┘%s\n\n", dim, reset)
 }
 
 func readTargetFile(path string) ([]string, error) {

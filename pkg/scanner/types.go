@@ -126,6 +126,12 @@ type ScanConfig struct {
 
 	ExternalAPI bool `yaml:"external_api"`
 	JSSupport   bool `yaml:"js_support"`
+
+	Endpoints []string `yaml:"endpoints,omitempty"`
+}
+
+func (c ScanConfig) GetEndpoints() []string {
+	return c.Endpoints
 }
 
 type ScanResult struct {

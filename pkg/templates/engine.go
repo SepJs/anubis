@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"regexp"
 	"strconv"
@@ -184,11 +185,11 @@ func (e *Engine) Run(cfg scanner.ScanConfig, findings chan<- scanner.Finding) er
 		}
 
 		if len(payloads) == 0 {
-			e.execute(cfg, client, httpCfg, t, target, "", limiter)
+			e.execute(cfg, client, httpCfg, t, target, "", limiter, findings)
 			continue
 		}
 		for _, p := range payloads {
-			e.execute(cfg, client, httpCfg, t, target, p, limiter)
+			e.execute(cfg, client, httpCfg, t, target, p, limiter, findings)
 		}
 	}
 	return nil
@@ -202,6 +203,7 @@ func (e *Engine) execute(
 	target string,
 	payload string,
 	limiter *delay.Limiter,
+	findings chan<- scanner.Finding,
 ) {
 	ph := placeholder(t)
 	full := strings.TrimRight(target, "/") + t.Endpoint
@@ -220,7 +222,7 @@ func (e *Engine) execute(
 		reqBody = strings.NewReader(substitute(t.Body, ph, payload))
 	} else {
 		// GET with (optionally templated) query params
-		u, err := urlParse(full)
+		u, err := url.Parse(full)
 		if err != nil {
 			utils.LogDebug(cfg.Verbose, "template %s: parse url: %v", t.ID, err)
 			return
@@ -246,7 +248,7 @@ func (e *Engine) execute(
 		if httpCfg.UserAgent != "" {
 			req.Header.Set("User-Agent", httpCfg.UserAgent)
 		}
-		resp, err := client.Do(req)
+		resp, err = client.Do(req)
 		if err != nil {
 			utils.LogDebug(cfg.Verbose, "template %s: request failed: %v", t.ID, err)
 			return
@@ -259,12 +261,12 @@ func (e *Engine) execute(
 			return
 		}
 		if match(t, resp, string(body)) {
-			emitFinding(t, reqURL, payload)
+			emitFinding(t, reqURL, payload, findings)
 		}
 		return
 	}
 
-	resp, err := utils.DoRequest(client, method, reqURL, nil, httpCfg)
+	resp, err = utils.DoRequest(client, method, reqURL, nil, httpCfg)
 	if err != nil {
 		utils.LogDebug(cfg.Verbose, "template %s: request failed: %v", t.ID, err)
 		return
@@ -278,7 +280,7 @@ func (e *Engine) execute(
 	}
 
 	if match(t, resp, string(body)) {
-		emitFinding(t, reqURL, payload)
+		emitFinding(t, reqURL, payload, findings)
 	}
 }
 
@@ -291,7 +293,7 @@ func recordWait(cfg scanner.ScanConfig, limiter *delay.Limiter, status int) {
 	}
 }
 
-func emitFinding(t *Template, reqURL, payload string) {
+func emitFinding(t *Template, reqURL, payload string, findings chan<- scanner.Finding) {
 	findings <- scanner.Finding{
 		ID:          fmt.Sprintf("tpl-%s", t.ID),
 		Module:      "TEMPLATE",

@@ -1,339 +1,197 @@
-# Anubis v2.5.2
+# Anubis v2.6.0 — Enterprise-Grade CLI Security Scanner & Vulnerability Audit Engine
 
 ```
-  █████╗ ███╗   ██╗██╗   ██╗██████╗ ██╗███████╗
- ██╔══██╗████╗  ██║██║   ██║██╔══██╗██║██╔════╝
- ███████║██╔██╗ ██║██║   ██║██████╔╝██║███████╗
- ██╔══██╗██║╚██╗██║██║   ██║██╔══██╗██║╚════██║
- ██║  ██║██║ ╚████║╚██████╔╝██████╔╝██║███████║
- ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚═════╝ ╚═╝╚══════╝
+   █████╗ ███╗   ██╗██╗   ██╗██████╗ ██╗███████╗
+  ██╔══██╗████╗  ██║██║   ██║██╔══██╗██║██╔════╝
+  ███████║██╔██╗ ██║██║   ██║██████╔╝██║███████╗
+  ██╔══██║██║╚██╗██║██║   ██║██╔══██╗██║╚════██║
+  ██║  ██║██║ ╚████║╚██████╔╝██████╔╝██║███████║
+  ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚═════╝ ╚═╝╚══════╝
 ```
 
-**Version:** 2.5.2 | **Author:** Vladimir Unknown | **License:** MIT
+[![Release](https://img.shields.io/badge/release-v2.6.0-red.svg?style=flat-square)](https://github.com/SepJs/anubis/releases)
+[![Go Version](https://img.shields.io/badge/go-1.22+-00ADD8.svg?style=flat-square&logo=go)](https://golang.org)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg?style=flat-square)](#quick-install)
+[![Architecture](https://img.shields.io/badge/architecture-Zero--CGO%20Static-green.svg?style=flat-square)](#architecture)
+
+**Anubis** is a blazing fast, zero-CGO, static vulnerability audit engine and penetration testing CLI designed specifically for security researchers, DevSecOps pipelines, and red teams. It combines deep vulnerability fuzzing, recursive endpoint crawling, polymorphic anti-WAF evasion, and automated reporting into a unified, single-binary architecture.
 
 ---
 
-## What's New in v2.5.2
+## ⚡ What's New in v2.6.0
 
-- **3 new scan modules** — LFI, SSTI, Open Redirect
-- **Built-in web crawler** (`--crawl`) — feeds real endpoints to injection modules
-- **Nuclei-style YAML template engine** (`--templates`) — custom checks without Go code
-- **Rewritten SQLi detection** — error-based + boolean blind + time-based blind with baseline comparison (dramatically fewer false positives)
-- **Smarter XSS detection** — unescaped-reflection verification with context analysis
-- **External wordlists** for sensitive-file discovery via `--wordlist`
-- **Certificate Transparency** subdomain discovery via crt.sh (`--external-api`)
-- **One-line installers** for Linux, macOS, and Windows with automatic OS detection
+- 🎯 **Re-architected Standard CLI Manual (`--help`)**: Organized into clear, categorized functional groups (Target Specification, Audit Modes, Crawler, Templates, Evasion & Anti-WAF, Authentication, Network, Reporting, System) matching modern industry standards (Nuclei / FFUF / sqlmap).
+- 🕷️ **End-to-End Crawler Pipeline**: The high-speed recursive crawler (`--crawl`) is directly hooked into the active audit phase, auto-extracting internal links, forms, and inputs to feed injection engines (SQLi, XSS, LFI, SSTI).
+- 🤫 **Native Unix Pipe Integration (`-s`, `--silent`)**: Strips out banners, disclaimers, and interactive logs for seamless chaining with standard Unix tools (`grep`, `jq`, `awk`, `notify`).
+- 🛡️ **Polymorphic Anti-WAF & Jitter Timing**: Dynamic signature morphing and health-based adaptive throttling to evade modern cloud WAFs and rate limiters.
+- 📦 **Zero-Friction Linux Installer**: Enhanced `install.sh` with local source compile support and automated architecture detection (`amd64`/`arm64`).
+- 📊 **Executive & Machine-Readable Output**: Enhanced HTML executive summary with visual risk meters, alongside JSON and CSV exports for automated CI/CD gating.
 
 ---
 
-## Features
+## 🚀 Key Capabilities
 
-| Category         | Capabilities                                                                   |
-| ---------------- | ------------------------------------------------------------------------------ |
-| **Engine**       | Worker-pool concurrency, atomic state, context cancellation, zero memory leaks |
-| **Evasion**      | Polymorphic jitter, randomized delays, packet padding, DPI bypass              |
-| **Proxy**        | SOCKS5 / HTTP / HTTPS rotation, health checking, automatic failover            |
-| **Stealth**      | Ghost mode, browser fingerprint spoofing, cURL / Wget mimicry                  |
-| **Adaptive**     | AI-driven latency analysis, trend-based speed adjustment, anti-rate-limit      |
-| **Crawler**      | Same-host link & GET-form discovery, depth/page limits, feeds injection modules |
-| **Templates**    | Nuclei-style YAML custom checks — matchers, payloads, no Go code required      |
-| **Scanner**      | 12 modules + subdomain discovery, CVSS scoring, heuristic likelihood analysis  |
-| **Detection**    | Error-based, boolean-blind, and time-based SQLi; reflected-XSS context analysis|
-| **Reporting**    | HTML (risk meter, CVSS vectors), JSON, CSV + encrypted SQLite history          |
-| **API**          | gRPC remote control with TLS + token authentication                            |
-| **WAF Bypass**   | Double URL encoding, nested Base64, Unicode escape, comment injection          |
-| **Anti-Sandbox** | Honeypot detection, sandbox environment identification                         |
-| **Security**     | Input sanitization, panic recovery to user cache dir, stripped + PIE binary    |
-| **Platform**     | Linux / Windows / macOS, zero CGO dependencies, fully static binaries          |
+| Domain | Highlights |
+| :--- | :--- |
+| **Audit Engine** | Worker-pool concurrency, atomic state persistence, graceful signal trapping (`SIGINT`/`SIGTERM`), zero memory leaks. |
+| **Vulnerability Modules** | SQL Injection (Boolean, Time-based, Error-based), XSS, LFI, SSTI, Open Redirect, Sensitive Data/Env Leaks, Security Headers, Port Scanner, TLS/SSL Ciphers, DNS Enumeration, Tech Fingerprinting. |
+| **Web Crawler** | Same-origin link & form discovery, depth recursion control (`--crawl-depth`), page count limits (`--crawl-max-pages`), robots.txt compliance. |
+| **YAML Templates** | Nuclei-style custom vulnerability check templates (`--templates <dir>`) with matchers and condition logic. |
+| **Evasion & Stealth** | Ghost mode (`--ghost`), dynamic User-Agent rotation, polymorphic jitter, delay backoff strategies (`jitter`, `polymorphic`, `exponential`, `linear`, `fixed`). |
+| **Network & Proxies** | Multi-hop SOCKS5/HTTP/HTTPS proxy rotation, Tor routing (`socks5://127.0.0.1:9050`), custom CA bundles, SSL verification bypass. |
+| **Reporting** | Standalone executive HTML reports, JSON for automation, CSV for tabular audit analysis, OWASP Top 10 / CIS framework mappings. |
+| **Architecture** | 100% Go, Zero CGO, static binaries with stripped symbol tables (`-ldflags="-s -w"`). |
 
 ---
 
-## Quick Install
+## 📥 Quick Install
 
-### One-liner (recommended)
+### One-Line Automated Installation (Linux / macOS)
 
-**Linux / macOS:**
 ```bash
 curl -sSL https://raw.githubusercontent.com/SepJs/anubis/main/install.sh | bash
 ```
 
-**Windows (PowerShell):**
+### Windows (PowerShell)
+
 ```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force
-iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/SepJs/anubis/main/install.ps1'))
+irm https://raw.githubusercontent.com/SepJs/anubis/main/install.ps1 | iex
 ```
 
-The installer detects your OS and architecture automatically, then either
-downloads a prebuilt release binary or falls back to building from source
-with Go.
+### Building from Source
 
-### From source (any platform)
 ```bash
-git clone https://github.com/SepJs/anubis
+# Clone the repository
+git clone https://github.com/SepJs/anubis.git
 cd anubis
-make deps build
-sudo cp anubis /usr/local/bin/
-```
 
-### macOS (Homebrew)
-```bash
-brew install SepJs/anubis/anubis
-```
+# Build stripped, zero-CGO static binary
+CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o anubis ./cmd/anubis
 
----
-
-## Usage
-
-### Basic Scanning
-```bash
-# Passive recon (stealth)
-anubis -t https://example.com -l 1
-
-# Active scanning with ghost mode
-anubis -t https://example.com -l 2 --ghost --strategy polymorphic
-
-# Deep aggressive scan
-anubis -t https://example.com -l 3 --threads 20 --deep-scan
-```
-
-### Crawler
-```bash
-# Discover endpoints first, then test them with injection modules
-anubis -t https://example.com -l 2 --crawl --crawl-depth 2 --crawl-max-pages 50
-```
-
-The crawler extracts same-host links with query strings and GET forms
-(input names become testable parameters) and feeds everything to the
-injection modules — dramatically increasing coverage on multi-page apps.
-
-### Evasion & Stealth
-```bash
-# Ghost mode — minimal requests, time-based checks disabled
-anubis -t https://example.com -l 2 --ghost
-
-# Proxy rotation (SOCKS5)
-anubis -t https://example.com --proxy socks5://127.0.0.1:9050
-
-# Polymorphic delay — rotates between 4 delay patterns
-anubis -t https://example.com -l 2 --strategy polymorphic
-
-# Randomized jitter with custom variance
-anubis -t https://example.com -l 2 --strategy randomized
-
-# Full stealth profile from config
-anubis -c templates/default.yaml -t https://example.com
-```
-
-### Custom YAML Templates
-```bash
-# Run your own checks (Nuclei-style) from a directory of YAML files
-anubis -t https://example.com -l 2 --templates ./templates/custom
-```
-
-Example template:
-```yaml
-id: admin-panel-detect
-name: "Admin Panel Detection"
-severity: low
-level: 1
-endpoint: /admin
-method: GET
-condition: and
-matchers:
-  - type: status
-    value: "200"
-  - type: contains
-    value: "admin"
-remediation: "Restrict /admin to authenticated users."
-```
-
-Matcher types: `contains`, `regex`, `status`, `header`, `words` — combined
-with `condition: and|or`, optional inline or file-based payloads, custom
-placeholder syntax, CVSS / OWASP mapping, and remediation text.
-
-### Configuration
-```bash
-# Use YAML config with profiles
-anubis -c myconfig.yaml -t https://example.com -l 2
-
-# Example config profiles:
-#   stealth    — 3 threads, 500ms delay, ghost mode, polymorphic
-#   aggressive — 50 threads, 10ms delay, fixed strategy
-#   default    — 10 threads, 150ms delay, jitter strategy
-```
-
-### Advanced Features
-```bash
-# Profile mode (CPU/mem/trace)
-anubis -t https://example.com -l 1 --profile
-
-# Resume interrupted scan
-anubis --resume
-
-# Batch scan targets
-anubis --batch --batch-file targets.txt -l 1
-
-# External wordlist (feeds sensitive-file discovery AND brute-force)
-anubis -t https://example.com -l 1 --wordlist ~/seclists/Discovery/Web-Content/common.txt
-
-# Certificate Transparency subdomain discovery (crt.sh)
-anubis -t example.com -l 2 --external-api
-
-# Update to latest version
-anubis --update
-
-# Generate documentation
-anubis --gendoc
+# Move to system path (optional)
+sudo mv anubis /usr/local/bin/
 ```
 
 ---
 
-## Architecture
+## 💻 Usage & CLI Reference
 
 ```text
-╭──────────────────────────────────────────────────────────────────────────────────╮
-│                                    ANUBIS                                        │
-├──────────────┬───────────────────────────────────────────────────────────────────┤
-│ ENGINE       │ Worker-pool concurrency │ Atomic state │ Context cancellation     │
-│              │ Zero memory leaks                                                 │
-├──────────────┼───────────────────────────────────────────────────────────────────┤
-│ EVASION      │ Polymorphic jitter │ Randomized delays │ Packet padding           │
-│              │ DPI bypass                                                        │
-├──────────────┼───────────────────────────────────────────────────────────────────┤
-│ PROXY        │ SOCKS5/HTTP/HTTPS rotation │ Health checking │ Auto failover      │
-├──────────────┼───────────────────────────────────────────────────────────────────┤
-│ STEALTH      │ Ghost mode │ Browser fingerprint spoofing │ cURL/Wget mimicry     │
-├──────────────┼───────────────────────────────────────────────────────────────────┤
-│ ADAPTIVE     │ AI-driven latency analysis │ Trend-based speed adjustment         │
-│              │ Anti-rate-limit                                                   │
-├──────────────┼───────────────────────────────────────────────────────────────────┤
-│ CRAWLER      │ Same-host link extraction │ GET-form parsing │ depth/page limits   │
-│              │ Feeds discovered endpoints to injection modules                   │
-├──────────────┼───────────────────────────────────────────────────────────────────┤
-│ SCANNER      │ 13 modules + subdomain discovery │ CVSS scoring                   │
-│              │ Heuristic likelihood analysis                                     │
-├──────────────┼───────────────────────────────────────────────────────────────────┤
-│ TEMPLATES    │ YAML custom checks │ Nuclei-style matchers │ No Go code needed    │
-│              │ contains / regex / status / header / words matchers               │
-├──────────────┼───────────────────────────────────────────────────────────────────┤
-│ REPORTING    │ HTML (risk meter, CVSS vectors) │ JSON │ CSV                      │
-│              │ Encrypted SQLite history                                          │
-├──────────────┼───────────────────────────────────────────────────────────────────┤
-│ API          │ gRPC remote control with TLS + token auth                         │
-├──────────────┼───────────────────────────────────────────────────────────────────┤
-│ WAF BYPASS   │ Double URL encoding │ Nested Base64 │ Unicode escape              │
-│              │ Comment injection                                                 │
-├──────────────┼───────────────────────────────────────────────────────────────────┤
-│ ANTI-SANDBOX │ Honeypot detection │ Sandbox environment identification           │
-├──────────────┼───────────────────────────────────────────────────────────────────┤
-│ SECURITY     │ Input sanitization │ Panic recovery → user cache dir              │
-│              │ Stripped + PIE binary                                             │
-├──────────────┼───────────────────────────────────────────────────────────────────┤
-│ PLATFORM     │ Linux / Windows / macOS │ Zero CGO dependencies                   │
-│              │ Fully static binaries                                             │
-├──────────────┴───────────────────────────────────────────────────────────────────┤
-│                   Zero CGO  │  Cross-Platform   │  Static                        │
-╰──────────────────────────────────────────────────────────────────────────────────╯
+USAGE:
+  anubis -t <target> [flags]
+
+TARGET SPECIFICATION:
+  -t, --target <url/ip>        Target URL or IP address (e.g. https://example.com)
+  -b, --batch-file <path>      Scan multiple targets from text file (one per line)
+      --batch                  Enable batch target execution mode
+      --resume                 Resume interrupted scan from checkpoint (.anubis.state)
+
+SCAN LEVEL & AUDIT MODES:
+  -l, --level <1|2|3>          Audit depth: 1=Passive Recon, 2=Active Audit, 3=Deep Scan (default: 1)
+  -m, --modules <list>         Comma-separated list of modules to execute
+      --disable-modules <list> Comma-separated list of modules to skip
+      --quick-vuln             Stop each module immediately upon first verified vulnerability
+      --deep-scan              Enable exhaustive payload fuzzing (slower, maximum depth)
+      --module-priority <mode> Module order: severity, speed, comprehensive (default: severity)
+
+CRAWLER & TARGET DISCOVERY:
+      --crawl                  Crawl target to discover internal endpoints, links & forms
+      --crawl-depth <int>      Crawler link recursion depth limit (default: 2)
+      --crawl-max-pages <int>  Crawler max total unique pages to explore (default: 30)
+      --respect-limits         Respect target robots.txt rules and crawl delay directives
+
+CUSTOM CHECK TEMPLATES:
+      --templates <dir>        Directory of YAML custom vulnerability check templates
+
+EVASION & ANTI-WAF:
+      --ghost                  Ghost mode: randomize signatures and minimize detection footprint
+      --strategy <name>        Delay pattern: jitter, polymorphic, exponential, linear, fixed (default: jitter)
+      --max-delay <ms>         Maximum evasion delay threshold in milliseconds (default: 60000)
+      --adaptive-delay         Dynamically adjust request throttling based on server health (default: true)
+      --rate-limit <ms>        Base delay between requests in milliseconds (default: 150)
+
+AUTHENTICATION & INPUTS:
+  -u, --username <user>        Username for HTTP Basic or Form authentication
+  -p, --password <pass>        Password for authenticated audits
+  -w, --wordlist <path>        Custom dictionary file for path discovery and bruteforce
+      --payload-file <path>    Custom injection payload dictionary file
+      --auth-strategy <mode>   Auth strategy: none, defaults, bruteforce, combined (default: defaults)
+
+NETWORK & PROXY:
+      --proxy <url>            HTTP/HTTPS/SOCKS5 proxy URL (e.g. socks5://127.0.0.1:9050)
+      --proxy-auth <user:pass> Proxy authentication credentials in user:password format
+      --timeout <sec>          HTTP request and connection timeout in seconds (default: 30)
+      --threads <int>          Number of concurrent worker goroutines (default: 10)
+      --ssl-bypass             Bypass SSL/TLS certificate validation (insecure mode)
+      --ca-cert <path>         Path to custom CA certificate authority bundle
+      --user-agent <str>       Custom User-Agent header (defaults to polymorphic UA pool)
+      --protocols <list>       Protocols to audit: http, https (default: http,https)
+
+OUTPUT & REPORTING:
+  -o, --output <file>          Base filename or directory for output reports
+  -f, --format <format>        Report formats: html, json, csv (combine with +, default: html+json)
+      --report-level <lvl>     Reporting detail level: basic, detailed, comprehensive (default: comprehensive)
+      --baseline <file>        Compare current scan findings against a previous baseline file
+      --framework-map          Map discovered findings to OWASP Top 10 and CIS benchmarks
+      --framework-examples <m> Include mitigation code examples: owasp, cis, both
+
+GENERAL & SYSTEM:
+  -v, --verbose                Enable verbose real-time debugging output
+  -s, --silent                 Silent mode: suppress banner & non-finding logs for Unix pipes
+  -c, --config <file>          Load scan configuration options from YAML file
+      --profile                Enable CPU, memory, and runtime execution profiling
+      --check-update           Check GitHub for newer releases without downloading
+      --update                 Download and install the latest Anubis release
+      --version                Print version, architecture, and build information
+  -h, --help                   Display this help manual
 ```
 
 ---
 
-## Scan Modules
+## 🛠️ Practical Examples
 
-| Module              | Level | Description                                          |
-| ------------------- | ----- | ---------------------------------------------------- |
-| **PORT_SCAN**       | ⚪ L1 | TCP port scanning with service detection             |
-| **SSL_CHECK**       | ⚪ L1 | TLS/SSL certificate analysis                         |
-| **HEADERS**         | ⚪ L1 | HTTP security headers audit                          |
-| **SENSITIVE_FILES** | ⚪ L1 | Sensitive file discovery (supports `--wordlist`)     |
-| **DNS**             | 🟡 L2 | DNS enumeration, brute-force + CT-log subdomain discovery |
-| **SQLI**            | 🟡 L2 | SQL injection — error, boolean-blind, time-blind     |
-| **XSS**             | 🟡 L2 | Reflected XSS with context analysis                  |
-| **BRUTE_FORCE**     | 🟡 L2 | Default credential testing                           |
-| **FINGERPRINT**     | 🔴 L3 | Web stack fingerprinting                             |
-| **LFI**             | 🟡 L2 | Path traversal / local file inclusion                |
-| **SSTI**            | 🟡 L2 | Server-side template injection                       |
-| **OPENREDIRECT**    | 🟡 L2 | Unvalidated redirect detection (canary host)         |
-| **TEMPLATE**        | L- dep. | Your YAML-defined custom checks                    |
-
-**Total built-in modules:** 12
-
-### Levels Overview
-
-* ⚪ **L1 – Recon**: Basic reconnaissance and passive analysis
-* 🟡 **L2 – Attack**: Active vulnerability testing
-* 🔴 **L3 – Deep**: Advanced fingerprinting and deep inspection
-
----
-
-## Custom Templates
-
-Create `templates/custom/my-check.yaml`:
-
-```yaml
-id: exposed-git-config
-name: "Exposed .git/config"
-description: "Checks whether the .git/config file is publicly readable"
-severity: critical
-level: 1
-endpoint: /.git/config
-method: GET
-condition: and
-matchers:
-  - type: status
-    value: "200"
-  - type: contains
-    value: "[core]"
-cvss: 7.5
-owasp: "A05:2021 – Security Misconfiguration"
-remediation: "Block access to .git directories at the web server level."
-```
-
-Supported matcher types: `contains` · `regex` · `status` · `header` · `words`
-
-Combine matchers with `condition: and | or`, attach inline or file-based
-payload lists, and use `{{payload}}` substitution anywhere in params or body.
-
----
-
-## Packaging
-
-### Homebrew (macOS/Linux)
+### 1. Stealth Passive Reconnaissance
+Run a passive footprinting audit with TLS/SSL verification, security headers analysis, and DNS discovery:
 ```bash
-# Local tap
-brew install --HEAD ./anubis.rb
-
-# Future: official tap
-brew tap SepJs/anubis
-brew install anubis
+anubis -t https://example.com -l 1
 ```
 
-### One-liner installers
+### 2. Active Vulnerability Audit with Crawler & Anti-WAF
+Crawl target endpoints and run injection audits using polymorphic evasion:
 ```bash
-# Linux / macOS
-curl -sSL https://raw.githubusercontent.com/SepJs/anubis/main/install.sh | bash
-```
-```powershell
-# Windows
-iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/SepJs/anubis/main/install.ps1'))
+anubis -t https://example.com -l 2 --crawl --ghost --strategy polymorphic
 ```
 
-### Docker
-```dockerfile
-FROM golang:1.21-alpine AS build
-RUN apk add --no-cache git
-COPY . /src
-WORKDIR /src
-RUN CGO_ENABLED=0 go build -o /anubis ./cmd/anubis
+### 3. Deep Fuzzing with Custom YAML Templates Routed via Tor
+Execute exhaustive payload fuzzing through a SOCKS5 Tor proxy:
+```bash
+anubis -t https://example.com -l 3 --templates templates/custom --proxy socks5://127.0.0.1:9050
+```
 
-FROM alpine:3.19
-RUN apk add --no-cache ca-certificates
-COPY --from=build /anubis /usr/local/bin/anubis
-ENTRYPOINT ["anubis"]
+### 4. Headless CI/CD Unix Pipeline (Silent Mode)
+Extract critical findings in JSON format directly in your pipeline:
+```bash
+anubis -t https://example.com -l 2 -s -f json -o report | jq '.findings[] | select(.severity=="CRITICAL")'
+```
+
+### 5. Multi-Target Batch Audit
+Scan an entire IP range or URL list and generate both HTML and JSON reports:
+```bash
+anubis --batch -b targets.txt -l 2 -o client_audit -f html+json
 ```
 
 ---
 
-## Disclaimer
+## 🛡️ Legal & Ethical Disclaimer
 
-This tool is for **authorized security testing only**. Scanning systems you don't own or have written permission to test is illegal. The author assumes no liability for misuse.
+> [!WARNING]
+> **Anubis is designed strictly for authorized penetration testing, vulnerability assessments, and educational security research.**
+> 
+> Running unauthorized scans against targets without prior explicit written consent is illegal and violates computer fraud laws. The developers and contributors assume no liability and are not responsible for any misuse, damage, or legal consequences caused by this software.
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).

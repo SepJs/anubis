@@ -51,8 +51,14 @@ install_from_source() {
     [ -n "$go_ver" ] || return 1
     info "Building from source (go${go_ver}) ..."
     local tmp; tmp=$(mktemp -d)
-    git clone --depth 1 "https://github.com/${REPO}.git" "$tmp/src" 2>/dev/null || return 1
-    ( cd "$tmp/src" && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o "$tmp/anubis" ./cmd/anubis ) || return 1
+    if [ -f "./cmd/anubis/main.go" ]; then
+        info "Found local source tree, compiling..."
+        CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o "$tmp/anubis" ./cmd/anubis || return 1
+    else
+        git clone --depth 1 "https://github.com/${REPO}.git" "$tmp/src" 2>/dev/null || return 1
+        ( cd "$tmp/src" && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o "$tmp/anubis" ./cmd/anubis ) || return 1
+    fi
+    chmod +x "$tmp/anubis"
     $SUDO mv "$tmp/anubis" "$INSTALL_DIR/anubis"
 }
 

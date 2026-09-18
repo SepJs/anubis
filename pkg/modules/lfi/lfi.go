@@ -111,7 +111,6 @@ func testParam(
 	}
 
 	q := u.Query()
-	original := q.Get(param)
 	q.Set(param, payload)
 	u.RawQuery = q.Encode()
 	testURL := u.String()
@@ -152,7 +151,7 @@ func testParam(
   parameter to an index (e.g. ?page=3 → pages/3.php), never to a raw path.
 • Normalize the resolved path with filepath.Clean and verify it stays inside
   the intended base directory (prefix check against filepath.Base).
-• Reject input containing traversal sequences: ../, ..\, %2e%2e, %252e, null bytes.`, param),
+• Reject input containing traversal sequences: ../, ..\, %%2e%%2e, %%252e, null bytes.`, param),
 				VulnCode: fmt.Sprintf(`// VULNERABLE: user input used as a filesystem path
 page := req.FormValue("%s")
 data, _ := os.ReadFile("./pages/" + page)`, param),

@@ -150,3 +150,32 @@ func SafeClose(body io.ReadCloser) {
 		_ = body.Close()
 	}
 }
+
+// EndpointProvider is an interface for configurations providing discovered endpoints.
+type EndpointProvider interface {
+	GetEndpoints() []string
+}
+
+// EndpointList returns the primary target plus any additional discovered endpoints.
+func EndpointList(cfg any, target string) []string {
+	seen := make(map[string]bool)
+	var list []string
+
+	normTarget := NormalizeTarget(target)
+	if normTarget != "" {
+		seen[normTarget] = true
+		list = append(list, normTarget)
+	}
+
+	if ep, ok := cfg.(EndpointProvider); ok {
+		for _, e := range ep.GetEndpoints() {
+			n := NormalizeTarget(e)
+			if n != "" && !seen[n] {
+				seen[n] = true
+				list = append(list, n)
+			}
+		}
+	}
+	return list
+}
+

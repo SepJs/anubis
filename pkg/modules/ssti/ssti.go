@@ -145,7 +145,7 @@ func testParam(
 • Choose sandboxed template engines or enable strict sandbox modes.
 • Restrict engine capabilities (disable dangerous globals, filters, imports).`, param),
 			VulnCode: fmt.Sprintf(`// VULNERABLE: user input becomes part of the template source
-tpl := fmt.Sprintf("Hello {{ .Name | %s }}", req.FormValue("%s"))
+tpl := fmt.Sprintf("Hello {{ .Name }}", req.FormValue("%s"))
 tmpl.Execute(w, data) // template body includes attacker text`, param),
 			SecureCode: fmt.Sprintf(`// SECURE: user input passed as data, not as template source
 tmpl := template.Must(template.New("greet").Parse("Hello {{ .Name }}"))

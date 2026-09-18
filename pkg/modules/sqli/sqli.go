@@ -327,7 +327,7 @@ func emitBooleanBlind(findings chan<- scanner.Finding, module, targetURL, param 
 	}
 }
 
-func emitTimeBlind(findings chan<- scanner.Finding, module, targetURL, param, tp struct {
+func emitTimeBlind(findings chan<- scanner.Finding, module, targetURL, param string, tp struct {
 	payload string
 	dbType  string
 	seconds int

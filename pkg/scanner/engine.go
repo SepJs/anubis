@@ -212,7 +212,7 @@ func (e *Engine) runModule(ctx context.Context, m Module, findings chan<- Findin
 		StartTime:  time.Now(),
 	}
 
-	utils.LogInfo("[ %-22s ] Starting...", m.Name())
+	utils.LogModule(m.Name(), "Executing checks against target...")
 
 	done := make(chan error, 1)
 	go func() {
@@ -240,13 +240,12 @@ func (e *Engine) runModule(ctx context.Context, m Module, findings chan<- Findin
 		if err != nil {
 			mr.Status = "failed"
 			mr.Error = err.Error()
-			utils.LogWarn("[ %-22s ] Failed  (%s): %s",
+			utils.LogWarn("[%s] Failed after %s: %s",
 				m.Name(), mr.Duration.Round(time.Millisecond), err)
 		} else {
 			mr.Status = "completed"
-			utils.LogSuccess("[ %-22s ] Done    (%s)  findings: %d",
-				m.Name(), mr.Duration.Round(time.Millisecond),
-				int(e.findingsTotal.Load()))
+			utils.LogSuccess("[%s] Completed in %s",
+				m.Name(), mr.Duration.Round(time.Millisecond))
 		}
 
 	case <-ctx.Done():
@@ -254,7 +253,7 @@ func (e *Engine) runModule(ctx context.Context, m Module, findings chan<- Findin
 		mr.Duration = mr.EndTime.Sub(mr.StartTime)
 		mr.Status = "timeout"
 		mr.Error = ctx.Err().Error()
-		utils.LogWarn("[ %-22s ] Timeout (%s)", m.Name(), mr.Duration.Round(time.Second))
+		utils.LogWarn("[%s] Timed out (%s)", m.Name(), mr.Duration.Round(time.Second))
 	}
 
 	return mr
@@ -359,16 +358,27 @@ func (e *Engine) saveCheckpoint() {
 }
 
 func printFinding(f Finding, verbose bool) {
-	sev := utils.SeverityColor(string(f.Severity))
-	fmt.Printf("  [%s] %s", sev, f.Title)
-	if f.Endpoint != "" {
-		fmt.Printf(" @ %s", f.Endpoint)
+	if utils.SilentMode {
+		return
+	}
+	badge := utils.SeverityBadge(string(f.Severity))
+	bold := "\033[1m"
+	reset := "\033[0m"
+	cyan := "\033[36m"
+	dim := "\033[2m"
+
+	fmt.Printf("  %s %s%s%s", badge, bold, f.Title, reset)
+	if f.CVSSScore > 0 {
+		fmt.Printf(" %s[CVSS %.1f]%s", dim, f.CVSSScore, reset)
 	}
 	if f.Parameter != "" {
-		fmt.Printf(" (param: %s)", f.Parameter)
+		fmt.Printf(" %s[%s]%s", cyan, f.Parameter, reset)
+	}
+	if f.Endpoint != "" {
+		fmt.Printf(" %s(%s)%s", dim, f.Endpoint, reset)
 	}
 	fmt.Println()
-	if verbose && f.Description != "" {
-		fmt.Printf("         %s\n", f.Description)
+	if verbose && f.Evidence != "" {
+		fmt.Printf("      %sEvidence: %s%s\n", dim, f.Evidence, reset)
 	}
 }
