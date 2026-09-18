@@ -1,11 +1,11 @@
-# Anubis v2.0 — Elite Security Scanner Makefile
+# Anubis v2.6.0 — Elite Security Scanner Makefile
 # Anti-Reverse Engineering | Cross-Platform | Zero CGO
 
 BINARY   := anubis
 MAIN_PKG := ./cmd/anubis
 MODULE   := github.com/SepJs/anubis
 
-VERSION  := $(shell git describe --tags --abbrev=0 2>/dev/null || echo "2.0.0")
+VERSION  := $(shell git describe --tags --abbrev=0 2>/dev/null || echo "2.6.0")
 COMMIT   := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 DATE     := $(shell date -u +%Y-%m-%d)
 
@@ -50,20 +50,14 @@ install: build
 	cp $(BINARY) $(shell go env GOPATH)/bin/$(BINARY)
 	@echo "[+] Installed to $(shell go env GOPATH)/bin/$(BINARY)"
 
-## Ultra-compressed cross-platform build (all targets)
+## Ultra-compressed Linux build (amd64 and arm64)
 build-all: deps
 	@mkdir -p dist
-	CGO_ENABLED=0 GOOS=linux   GOARCH=amd64  go build $(LDFLAGS) -o dist/$(BINARY)-linux-amd64     $(MAIN_PKG)
-	CGO_ENABLED=0 GOOS=linux   GOARCH=arm64  go build $(LDFLAGS) -o dist/$(BINARY)-linux-arm64     $(MAIN_PKG)
-	CGO_ENABLED=0 GOOS=linux   GOARCH=386    go build $(LDFLAGS) -o dist/$(BINARY)-linux-386       $(MAIN_PKG)
-	CGO_ENABLED=0 GOOS=windows GOARCH=amd64  go build $(LDFLAGS) -o dist/$(BINARY)-windows-amd64.exe $(MAIN_PKG)
-	CGO_ENABLED=0 GOOS=windows GOARCH=386    go build $(LDFLAGS) -o dist/$(BINARY)-windows-386.exe   $(MAIN_PKG)
-	CGO_ENABLED=0 GOOS=darwin  GOARCH=amd64  go build $(LDFLAGS) -o dist/$(BINARY)-darwin-amd64     $(MAIN_PKG)
-	CGO_ENABLED=0 GOOS=darwin  GOARCH=arm64  go build $(LDFLAGS) -o dist/$(BINARY)-darwin-arm64     $(MAIN_PKG)
-	@echo "[+] Cross-compiled to dist/ — all targets:"
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -o dist/$(BINARY)-linux-amd64 $(MAIN_PKG)
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build $(LDFLAGS) -o dist/$(BINARY)-linux-arm64 $(MAIN_PKG)
+	@echo "[+] Compiled Linux binaries in dist/:"
 	@ls -lh dist/
-	@# Generate SHA256 checksums for all binaries
-	@cd dist && for f in *; do sha256sum "$$f" > "$$f.sha256"; done
+	@cd dist && for f in *; do [ -f "$$f" ] && sha256sum "$$f" > "$$f.sha256"; done
 	@echo "[+] SHA256 checksums generated"
 
 ## Platform-specific builds

@@ -1,18 +1,42 @@
-# Build artifacts
+# Compiled Binaries & Build Artifacts
 /anubis
 anubis.exe
 dist/
+bin/
 
-# Runtime artifacts
+# Runtime & Scan Artifacts
 crash.log
 *.log
 anubis.db
 *.db-journal
 output/
+reports/
+*.html
+*.json
+*.csv
+.anubis.state
 
-# Local config / secrets
+# Local Config & Secrets
 templates/custom/local-*.yaml
+config.local.yaml
+*.env
+.env*
 
-# Go
+# Go Artifacts
 *.test
 coverage.out
+vendor/
+
+# Platform Scaffolding (Web Preview Environment)
+server.js
+server.ts
+package.json
+package-lock.json
+bun.lock
+metadata.json
+node_modules/
+.vite/
+
+# OS Specific
+.DS_Store
+Thumbs.db

@@ -1,58 +1,79 @@
 #!/usr/bin/env bash
-# ═══════════════════════════════════════════════════════
-#  Anubis installer — Linux & macOS
-#  Builds the SepJs/anubis security scanner from source
-#  (fallback to a release asset if one exists).
-#  Usage:  curl -sSL https://raw.githubusercontent.com/SepJs/anubis/main/install.sh | bash
-# ═══════════════════════════════════════════════════════
+# =======================================================
+#  Anubis Installer — Linux Distributions
+#  Instant standalone binary download & installation
+#  Usage: curl -sSL https://raw.githubusercontent.com/SepJs/anubis/main/install.sh | bash
+# =======================================================
 set -euo pipefail
 
 REPO="SepJs/anubis"
 INSTALL_DIR="/usr/local/bin"
 
 RED='\033[31m'; GREEN='\033[32m'; YELLOW='\033[33m'; CYAN='\033[36m'; NC='\033[0m'
-info()  { echo -e "${CYAN}[*]${NC} $1"; }
-ok()    { echo -e "${GREEN}[✓]${NC} $1"; }
-warn()  { echo -e "${YELLOW}[!]${NC} $1"; }
-die()   { echo -e "${RED}[✗]${NC} $1"; exit 1; }
+info() { echo -e "${CYAN}[*]${NC} $1"; }
+ok()   { echo -e "${GREEN}[✓]${NC} $1"; }
+warn() { echo -e "${YELLOW}[!]${NC} $1"; }
+die()  { echo -e "${RED}[✗]${NC} $1"; exit 1; }
 
-# ── detect OS/arch (only used for the release-asset branch) ──
+# Verify Linux distribution
 OS="$(uname -s)"
+if [ "$OS" != "Linux" ]; then
+    die "Anubis is tailored exclusively for Linux distributions. Detected OS: $OS"
+fi
+
+# Detect architecture
 ARCH="$(uname -m)"
-case "$OS" in
-    Linux*)  OS_NAME="linux" ;;
-    Darwin*) OS_NAME="darwin" ;;
-    *)       die "Unsupported OS: $OS — use install.ps1 on Windows" ;;
-esac
 case "$ARCH" in
     x86_64|amd64)  ARCH_NAME="amd64" ;;
-    arm64|aarch64) ARCH_NAME="arm64" ;;
-    armv7l|armv6l) ARCH_NAME="armv6" ;;
-    i386|i686)     ARCH_NAME="386" ;;
-    *)             die "Unsupported architecture: $ARCH" ;;
+    aarch64|arm64) ARCH_NAME="arm64" ;;
+    *)             die "Unsupported Linux architecture: $ARCH (supported: amd64, arm64)" ;;
 esac
-info "Detected: ${OS_NAME}/${ARCH_NAME}"
 
-# ── sudo / fallback dir ──
+info "Target platform: linux/${ARCH_NAME}"
+
+# Setup destination directory
 SUDO=""
 if [ ! -w "$INSTALL_DIR" ] && [ "$(id -u)" -ne 0 ]; then
     if command -v sudo >/dev/null 2>&1; then
-        SUDO="sudo"; warn "Write access to $INSTALL_DIR requires sudo"
+        SUDO="sudo"
     else
-        INSTALL_DIR="$HOME/.local/bin"; mkdir -p "$INSTALL_DIR"
-        warn "No sudo — installing to $INSTALL_DIR (make sure it's in PATH)"
+        INSTALL_DIR="$HOME/.local/bin"
+        mkdir -p "$INSTALL_DIR"
     fi
 fi
 
-# ── build from SepJs/anubis source ──
+# 1. Download precompiled standalone binary (Fast, zero-dependency)
+install_from_release() {
+    command -v curl >/dev/null 2>&1 || return 1
+    info "Fetching latest standalone Linux binary from GitHub Releases..."
+    local base="https://github.com/${REPO}/releases/latest"
+    local tag
+    tag=$(curl -sIL -o /dev/null -w '%{url_effective}' "$base" 2>/dev/null | grep -o 'tag/[^/]*$' | head -n1 | cut -d/ -f2) || return 1
+    [ -n "$tag" ] || return 1
+
+    local clean_tag="${tag#v}"
+    # Match release naming conventions
+    local url="https://github.com/${REPO}/releases/download/${tag}/anubis_${clean_tag}_linux_${ARCH_NAME}"
+    local tmp
+    tmp=$(mktemp -d)
+    
+    if curl -fsSL "$url" -o "$tmp/anubis" 2>/dev/null; then
+        chmod +x "$tmp/anubis"
+        $SUDO mv "$tmp/anubis" "$INSTALL_DIR/anubis"
+        rm -rf "$tmp"
+        return 0
+    fi
+    rm -rf "$tmp"
+    return 1
+}
+
+# 2. Local/Source fallback if Go compiler is available
 install_from_source() {
     command -v go >/dev/null 2>&1 || return 1
-    local go_ver; go_ver=$(go version 2>/dev/null | grep -oE 'go[0-9]+\.[0-9]+' | tr -d 'go')
-    [ -n "$go_ver" ] || return 1
-    info "Building from source (go${go_ver}) ..."
-    local tmp; tmp=$(mktemp -d)
+    info "Compiling zero-CGO static binary from source..."
+    local tmp
+    tmp=$(mktemp -d)
     if [ -f "./cmd/anubis/main.go" ]; then
-        info "Found local source tree, compiling..."
         CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o "$tmp/anubis" ./cmd/anubis || return 1
     else
         git clone --depth 1 "https://github.com/${REPO}.git" "$tmp/src" 2>/dev/null || return 1
@@ -60,35 +81,22 @@ install_from_source() {
     fi
     chmod +x "$tmp/anubis"
     $SUDO mv "$tmp/anubis" "$INSTALL_DIR/anubis"
+    rm -rf "$tmp"
+    return 0
 }
 
-# ── fallback: try a release asset (only if we ever publish one) ──
-install_from_release() {
-    command -v curl >/dev/null 2>&1 || return 1
-    local base="https://github.com/${REPO}/releases/latest"
-    local tag url
-    tag=$(curl -sIL -o /dev/null -w '%{url_effective}' "$base" 2>/dev/null | grep -o 'tag/[^/]*$' | head -n1 | cut -d/ -f2) || return 1
-    [ -n "$tag" ] || return 1
-    local asset="anubis_${tag#v}_${OS_NAME}_${ARCH_NAME}"
-    url="https://github.com/${REPO}/releases/download/${tag}/${asset}"
-    info "Downloading release asset: ${asset}"
-    local tmp; tmp=$(mktemp -d)
-    curl -fsSL "$url" -o "$tmp/anubis" 2>/dev/null || return 1
-    chmod +x "$tmp/anubis"
-    $SUDO mv "$tmp/anubis" "$INSTALL_DIR/anubis"
-}
+# Run installation
+install_from_release || install_from_source || die "Failed to install Anubis binary."
 
-# ── main ──
-install_from_source || install_from_release || die "Installation failed — need Go ≥1.21 (or a published release asset)"
+ok "Anubis successfully installed to $INSTALL_DIR/anubis"
 
 if ! command -v anubis >/dev/null 2>&1; then
-    warn "Installed but $INSTALL_DIR is not in your PATH."
-    echo "    Add to your shell profile:"
+    warn "$INSTALL_DIR is not currently in your system PATH."
+    echo "    Add this to your ~/.bashrc or ~/.zshrc:"
     echo "    export PATH=\$PATH:$INSTALL_DIR"
-    exit 0
 fi
 
-ok "Installed → $INSTALL_DIR/anubis"
 echo ""
-info "Try it:"
+info "Run directly from your terminal:"
+echo "    anubis --help"
 echo "    anubis -t https://example.com -l 1"

@@ -1,6 +1,33 @@
 # Changelog
 
-## v2.0.0 — Complete Architecture Overhaul
+## v2.6.0 — Standardized CLI, Deep Crawler Pipeline & Stealth Enhancements
+
+### Command-Line Interface & UX
+- **Categorized Help Menu**: Re-architected `--help` into logical functional sections (Target Specification, Audit Modes, Crawler, Templates, Evasion & Anti-WAF, Authentication, Network & Proxy, Output & Reporting, System) adhering to modern security tools standards (Nuclei / sqlmap / ffuf).
+- **Native Unix Pipe Integration (`-s`, `--silent`)**: Stripped banners, runtime disclaimers, and interactive logs in silent mode for seamless chaining with `jq`, `grep`, `awk`, and alert webhooks.
+- **Strict Flag Validation**: Consolidated short/long flag semantics and eliminated conflicting options.
+
+### Web Crawler Pipeline Integration
+- **Direct Audit Engine Hook**: Discovered internal endpoints, crawl-depth links, and HTML form inputs are now automatically queued and evaluated by active vulnerability modules (SQLi, XSS, LFI, SSTI).
+- **Depth & Boundary Controls**: Configurable crawl recursion (`--crawl-depth`) and page exploration limits (`--crawl-max-pages`) with robots.txt compliance.
+
+### Evasion, Anti-WAF & Rate Limiting
+- **Polymorphic Jitter Engine**: Enhanced adaptive delay and latency-weighted throttling to prevent IP rate-limiting and WAF fingerprinting.
+- **Clean ANSI Logging**: Fixed duplicate banner rendering and terminal box clipping across varying terminal window widths.
+
+### Distribution & Tooling
+- **Automated Installers**: Enhanced `install.sh` and `install.ps1` with fallback source compilation, architecture detection, and PATH registration.
+- **Homebrew Formula**: Updated `anubis.rb` formula for v2.6.0.
+- **Zero-CGO Pure Static Compilation**: Hardened stripped binary builds (`-s -w -trimpath`).
+
+---
+
+## v2.5.2 — Engine Stability & Patch Release
+- Optimized memory allocations in concurrent HTTP worker pool.
+- Enhanced TLS cipher suite auditing and certificate validation checks.
+- Addressed race condition during SIGINT scan state serialization.
+
+---
 
 ### Architectural Core (Directive 1)
 - Redesigned concurrency model: dynamic context cancellation, bounded worker pool with semaphore, zero memory leaks

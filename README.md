@@ -12,21 +12,20 @@
 [![Release](https://img.shields.io/badge/release-v2.6.0-red.svg?style=flat-square)](https://github.com/SepJs/anubis/releases)
 [![Go Version](https://img.shields.io/badge/go-1.22+-00ADD8.svg?style=flat-square&logo=go)](https://golang.org)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg?style=flat-square)](#quick-install)
+[![Platform](https://img.shields.io/badge/platform-Linux%20Distros%20(x86__64%20%7C%20arm64)-orange.svg?style=flat-square)](#quick-download--install)
 [![Architecture](https://img.shields.io/badge/architecture-Zero--CGO%20Static-green.svg?style=flat-square)](#architecture)
 
-**Anubis** is a blazing fast, zero-CGO, static vulnerability audit engine and penetration testing CLI designed specifically for security researchers, DevSecOps pipelines, and red teams. It combines deep vulnerability fuzzing, recursive endpoint crawling, polymorphic anti-WAF evasion, and automated reporting into a unified, single-binary architecture.
+**Anubis** is a fast, zero-dependency, static vulnerability audit engine and network assessment CLI designed specifically for Linux environments (Ubuntu, Debian, Kali Linux, Arch, Fedora, Alpine). Built as a standalone portable binary with zero external runtime dependencies.
 
 ---
 
 ## ⚡ What's New in v2.6.0
 
-- 🎯 **Re-architected Standard CLI Manual (`--help`)**: Organized into clear, categorized functional groups (Target Specification, Audit Modes, Crawler, Templates, Evasion & Anti-WAF, Authentication, Network, Reporting, System) matching modern industry standards (Nuclei / FFUF / sqlmap).
-- 🕷️ **End-to-End Crawler Pipeline**: The high-speed recursive crawler (`--crawl`) is directly hooked into the active audit phase, auto-extracting internal links, forms, and inputs to feed injection engines (SQLi, XSS, LFI, SSTI).
-- 🤫 **Native Unix Pipe Integration (`-s`, `--silent`)**: Strips out banners, disclaimers, and interactive logs for seamless chaining with standard Unix tools (`grep`, `jq`, `awk`, `notify`).
+- 🎯 **Standardized CLI Manual (`--help`)**: Organized into clear, categorized functional groups matching industry-standard Linux utilities.
+- 🕷️ **End-to-End Crawler Pipeline**: The high-speed recursive crawler (`--crawl`) is directly hooked into the active audit phase to discover internal endpoints, links, and forms.
+- 🤫 **Native Unix Pipe Integration (`-s`, `--silent`)**: Strips out banners and interactive logs for seamless piping with standard Unix utilities (`grep`, `jq`, `awk`).
 - 🛡️ **Polymorphic Anti-WAF & Jitter Timing**: Dynamic signature morphing and health-based adaptive throttling to evade modern cloud WAFs and rate limiters.
-- 📦 **Zero-Friction Linux Installer**: Enhanced `install.sh` with local source compile support and automated architecture detection (`amd64`/`arm64`).
-- 📊 **Executive & Machine-Readable Output**: Enhanced HTML executive summary with visual risk meters, alongside JSON and CSV exports for automated CI/CD gating.
+- 📦 **Instant Zero-Setup Linux Distribution**: Standalone pre-compiled Linux binaries (`amd64` / `arm64`) with no runtime or language installation required.
 
 ---
 
@@ -35,7 +34,7 @@
 | Domain | Highlights |
 | :--- | :--- |
 | **Audit Engine** | Worker-pool concurrency, atomic state persistence, graceful signal trapping (`SIGINT`/`SIGTERM`), zero memory leaks. |
-| **Vulnerability Modules** | SQL Injection (Boolean, Time-based, Error-based), XSS, LFI, SSTI, Open Redirect, Sensitive Data/Env Leaks, Security Headers, Port Scanner, TLS/SSL Ciphers, DNS Enumeration, Tech Fingerprinting. |
+| **Vulnerability Modules** | SQL Injection, XSS, LFI, SSTI, Open Redirect, Sensitive Data/Env Leaks, Security Headers, Port Scanner, TLS/SSL Ciphers, DNS Enumeration, Tech Fingerprinting. |
 | **Web Crawler** | Same-origin link & form discovery, depth recursion control (`--crawl-depth`), page count limits (`--crawl-max-pages`), robots.txt compliance. |
 | **YAML Templates** | Nuclei-style custom vulnerability check templates (`--templates <dir>`) with matchers and condition logic. |
 | **Evasion & Stealth** | Ghost mode (`--ghost`), dynamic User-Agent rotation, polymorphic jitter, delay backoff strategies (`jitter`, `polymorphic`, `exponential`, `linear`, `fixed`). |
@@ -45,31 +44,45 @@
 
 ---
 
-## 📥 Quick Install
+## 📥 Quick Download & Install
 
-### One-Line Automated Installation (Linux / macOS)
+### Option A: One-Line Automatic Downloader (Recommended)
+
+Downloads the pre-compiled standalone binary directly to `/usr/local/bin/anubis`:
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/SepJs/anubis/main/install.sh | bash
 ```
 
-### Windows (PowerShell)
+### Option B: Direct Binary Download (Zero Setup)
 
-```powershell
-irm https://raw.githubusercontent.com/SepJs/anubis/main/install.ps1 | iex
+Simply download the executable for your Linux architecture, make it executable, and run:
+
+**For Linux x86_64 (amd64 / Ubuntu / Debian / Kali / Arch):**
+```bash
+curl -sSL https://github.com/SepJs/anubis/releases/latest/download/anubis_2.6.0_linux_amd64 -o anubis
+chmod +x anubis
+sudo mv anubis /usr/local/bin/
 ```
 
-### Building from Source
+**For Linux ARM64 (aarch64 / Raspberry Pi / Cloud ARM):**
+```bash
+curl -sSL https://github.com/SepJs/anubis/releases/latest/download/anubis_2.6.0_linux_arm64 -o anubis
+chmod +x anubis
+sudo mv anubis /usr/local/bin/
+```
+
+Verify the installation:
+```bash
+anubis --version
+```
+
+### Option C: Compile from Source (Optional)
 
 ```bash
-# Clone the repository
 git clone https://github.com/SepJs/anubis.git
 cd anubis
-
-# Build stripped, zero-CGO static binary
 CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o anubis ./cmd/anubis
-
-# Move to system path (optional)
 sudo mv anubis /usr/local/bin/
 ```
 
